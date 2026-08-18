@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -222,7 +222,7 @@
             background-color: #2563eb;
         }
 
-        /* Controls Section (Search, Sort, Filters) */
+        /* Controls Section (Search, Sort) */
         .controls-row {
             display: flex;
             gap: 10px;
@@ -248,7 +248,7 @@
         }
 
         .sort-select-wrapper {
-            width: 140px;
+            width: 150px;
             position: relative;
         }
 
@@ -261,6 +261,7 @@
             cursor: pointer;
         }
 
+        /* Filters */
         .filter-tabs {
             display: flex;
             gap: 8px;
@@ -454,7 +455,7 @@
                 <p class="subtitle">Intelligent Academic Tracker & Planner</p>
             </div>
             <button id="btn-notification" class="btn-notify" onclick="toggleNotificationPermission()">
-                🔔 แจ้งเตือน
+                🔔 Notifications
             </button>
         </header>
 
@@ -474,7 +475,7 @@
             </div>
         </div>
 
-        <!-- Form -->
+        <!-- Form Card -->
         <div class="card">
             <div class="card-title">+ Create New Task</div>
             <form id="task-form">
@@ -484,7 +485,7 @@
                 </div>
                 <div class="form-group">
                     <label>Notes / Details (Optional)</label>
-                    <textarea id="task-note" rows="2" placeholder="e.g. ส่งทาง Google Classroom / ทำใส่กระดาษ A4"></textarea>
+                    <textarea id="task-note" rows="2" placeholder="e.g. Submit via Google Classroom / Group project"></textarea>
                 </div>
                 <div class="date-row">
                     <div class="form-group">
@@ -504,13 +505,13 @@
         <div class="controls-row">
             <div class="search-box">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="search-input" placeholder="Search tasks...">
+                <input type="text" id="search-input" placeholder="Search tasks or notes...">
             </div>
             <div class="sort-select-wrapper">
                 <select id="sort-select">
-                    <option value="dueDate">⏰ วันส่งใกล้สุด</option>
-                    <option value="assignedDate">📅 วันสั่งใกล้สุด</option>
-                    <option value="newest">🆕 สร้างล่าสุด</option>
+                    <option value="dueDate">⏰ Due Date</option>
+                    <option value="assignedDate">📅 Assigned Date</option>
+                    <option value="newest">🆕 Newest Created</option>
                 </select>
             </div>
         </div>
@@ -576,7 +577,6 @@
             document.getElementById('completed-count').textContent = completedCount;
 
             const nowIso = new Date().toISOString().slice(0, 16);
-            const todayStr = new Date().toISOString().split('T')[0];
 
             // 1. Filter Tasks
             let filteredTasks = tasks.filter(task => {
@@ -626,8 +626,8 @@
                     const taskCard = document.createElement('div');
                     taskCard.className = `task-item ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
 
-                    const assignedText = task.assignedDate ? `สั่ง: ${task.assignedDate}` : '';
-                    const dueText = task.dueDate ? `ส่ง: ${formatDateTimeDisplay(task.dueDate)}` : '';
+                    const assignedText = task.assignedDate ? `Assigned: ${task.assignedDate}` : '';
+                    const dueText = task.dueDate ? `Due: ${formatDateTimeDisplay(task.dueDate)}` : '';
                     const noteHTML = task.note ? `<div class="task-note">📝 ${escapeHtml(task.note)}</div>` : '';
 
                     taskCard.innerHTML = `
@@ -641,14 +641,14 @@
                             ${noteHTML}
                             <div class="task-dates">
                                 ${assignedText ? `<span>📅 ${assignedText}</span>` : ''}
-                                ${dueText ? `<span style="color: ${isOverdue ? '#ef4444' : '#38bdf8'}; font-weight: ${isOverdue ? 'bold' : 'normal'};">⏰ ${dueText} ${isOverdue ? '(เลยกำหนดส่ง)' : ''}</span>` : ''}
+                                ${dueText ? `<span style="color: ${isOverdue ? '#ef4444' : '#38bdf8'}; font-weight: ${isOverdue ? 'bold' : 'normal'};">⏰ ${dueText} ${isOverdue ? '(Overdue)' : ''}</span>` : ''}
                             </div>
                         </div>
                         <div class="task-actions">
-                            <button class="btn-action btn-check ${task.completed ? 'active-check' : ''}" onclick="toggleTask(${task.id})" title="${task.completed ? 'ย้ายกลับไป Pending' : 'เปลี่ยนเป็น Completed'}">
+                            <button class="btn-action btn-check ${task.completed ? 'active-check' : ''}" onclick="toggleTask(${task.id})" title="${task.completed ? 'Mark as Pending' : 'Mark as Completed'}">
                                 ${task.completed ? '↩️' : '✓'}
                             </button>
-                            <button class="btn-action btn-delete" onclick="deleteTask(${task.id})" title="ลบรายการ">
+                            <button class="btn-action btn-delete" onclick="deleteTask(${task.id})" title="Delete Task">
                                 🗑️
                             </button>
                         </div>
@@ -715,13 +715,13 @@
 
         // Delete Task
         window.deleteTask = function(id) {
-            if (confirm('คุณต้องการลบรายการการบ้านนี้ใช่หรือไม่?')) {
+            if (confirm('Are you sure you want to delete this task?')) {
                 tasks = tasks.filter(t => t.id !== id);
                 saveAndRender();
             }
         };
 
-        // Notification API Handler
+        // Notification Handler
         function updateNotificationBtnState() {
             if (!("Notification" in window)) {
                 btnNotification.style.display = "none";
@@ -729,33 +729,33 @@
             }
             if (Notification.permission === "granted") {
                 btnNotification.classList.add("active");
-                btnNotification.innerHTML = "🔔 เปิดแจ้งเตือนแล้ว";
+                btnNotification.innerHTML = "🔔 Notifications On";
             } else {
                 btnNotification.classList.remove("active");
-                btnNotification.innerHTML = "🔔 เปิดการแจ้งเตือน";
+                btnNotification.innerHTML = "🔔 Notifications";
             }
         }
 
         window.toggleNotificationPermission = function() {
             if (!("Notification" in window)) {
-                alert("เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน");
+                alert("Your browser does not support notifications.");
                 return;
             }
 
             if (Notification.permission === "granted") {
-                alert("เปิดการแจ้งเตือนเรียบร้อยแล้ว");
+                alert("Notifications are already enabled!");
             } else if (Notification.permission !== "denied") {
                 Notification.requestPermission().then(permission => {
                     updateNotificationBtnState();
                     if (permission === "granted") {
                         new Notification("Homework Tracker", {
-                            body: "เปิดการแจ้งเตือนการบ้านสำเร็จแล้ว!",
+                            body: "Notifications enabled successfully!",
                             icon: "icon-192.png"
                         });
                     }
                 });
             } else {
-                alert("กรุณาเปิดการอนุญาตการแจ้งเตือนในตั้งค่าเบราว์เซอร์ของคุณ");
+                alert("Please enable notification permissions in your browser settings.");
             }
         };
 
@@ -767,8 +767,8 @@
             tasks.forEach(task => {
                 if (!task.completed && task.dueDate && !task.notified) {
                     if (task.dueDate <= nowIso) {
-                        new Notification(`⏰ ถึงกำหนดส่งการบ้าน: ${task.title}`, {
-                            body: `กำหนดส่ง: ${formatDateTimeDisplay(task.dueDate)}\n${task.note || ''}`,
+                        new Notification(`⏰ Homework Due: ${task.title}`, {
+                            body: `Due: ${formatDateTimeDisplay(task.dueDate)}\n${task.note || ''}`,
                             icon: "icon-192.png"
                         });
                         task.notified = true;
@@ -788,7 +788,7 @@
         updateNotificationBtnState();
         renderTasks();
 
-        // Periodically check notifications every 1 minute
+        // Check notifications every minute
         setInterval(checkAndTriggerNotifications, 60000);
 
         // Service Worker
