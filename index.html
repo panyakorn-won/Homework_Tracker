@@ -5,461 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <title>Homework Tracker</title>
-    <meta name="description" content="Homework Tracker - Intelligent Academic Tracker & Planner">
-    
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Homework Tracker">
-    <meta property="og:description" content="Homework Tracker - Intelligent Academic Tracker & Planner">
-    <meta property="og:url" content="https://panyakorn-won.github.io/Homework_Tracker/">
-    <meta property="og:image" content="https://panyakorn-won.github.io/Homework_Tracker/icon-512.png">
-    
-    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-    <link rel="shortcut icon" href="icon-192.png">
-    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#030712">
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: #030712;
-            color: #f3f4f6;
-            min-height: 100vh;
-            padding: 20px 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 480px;
-        }
-
-        /* Header & Logo */
-        .header {
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .brand-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 6px;
-        }
-
-        .app-logo {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            object-fit: cover;
-            background-color: #1e293b;
-        }
-
-        h1 {
-            font-size: 26px;
-            font-weight: 800;
-            color: #ffffff;
-            letter-spacing: -0.5px;
-        }
-
-        .subtitle {
-            font-size: 13px;
-            color: #94a3b8;
-            font-weight: 400;
-        }
-
-        .btn-notify {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            color: #f8fafc;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
-        }
-
-        .btn-notify.active {
-            background-color: #0284c722;
-            border-color: #38bdf8;
-            color: #38bdf8;
-        }
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background-color: #0b1329;
-            border: 1px solid #1e293b;
-            border-radius: 12px;
-            padding: 14px 8px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 22px;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: #64748b;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Form Card */
-        .card {
-            background-color: #0b1329;
-            border: 1px solid #1e293b;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #38bdf8;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .form-group {
-            margin-bottom: 14px;
-            min-width: 0;
-        }
-
-        label {
-            display: block;
-            font-size: 11px;
-            font-weight: 700;
-            color: #64748b;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            letter-spacing: 0.5px;
-        }
-
-        input[type="text"], input[type="date"], input[type="datetime-local"], textarea, select {
-            width: 100%;
-            min-width: 0;
-            max-width: 100%;
-            padding: 12px 10px;
-            background-color: #030712;
-            border: 1px solid #1e293b;
-            border-radius: 10px;
-            color: #f3f4f6;
-            font-size: 13px;
-            outline: none;
-            transition: border-color 0.2s;
-            box-sizing: border-box;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        input[type="date"], input[type="datetime-local"] {
-            min-height: 44px;
-            color-scheme: dark;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 64px;
-            font-size: 14px;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            border-color: #3b82f6;
-        }
-
-        .date-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 100%;
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background-color: #3b82f6;
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 6px;
-            transition: background-color 0.2s;
-        }
-
-        .btn-primary:active {
-            background-color: #2563eb;
-        }
-
-        /* Controls Section (Search, Sort) */
-        .controls-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-
-        .search-box {
-            position: relative;
-            flex: 1;
-        }
-
-        .search-box input {
-            padding-left: 36px;
-            font-size: 13px;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #64748b;
-        }
-
-        .sort-select-wrapper {
-            width: 150px;
-            position: relative;
-        }
-
-        .sort-select-wrapper select {
-            padding-right: 24px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%3C%2394a3b8' %3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 14px;
-            cursor: pointer;
-        }
-
-        /* Filters */
-        .filter-tabs {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            margin-bottom: 16px;
-            padding-bottom: 4px;
-        }
-
-        .tab {
-            padding: 8px 16px;
-            border-radius: 20px;
-            background-color: #0b1329;
-            border: 1px solid #1e293b;
-            color: #94a3b8;
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tab.active {
-            background-color: #3b82f6;
-            color: #ffffff;
-            border-color: #3b82f6;
-        }
-
-        /* Task List Container */
-        .task-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .task-item {
-            background-color: #0b1329;
-            border: 1px solid #1e293b;
-            border-radius: 14px;
-            padding: 16px;
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 12px;
-            transition: all 0.2s;
-        }
-
-        .task-item.completed {
-            opacity: 0.75;
-            border-color: #10b98144;
-            background-color: #064e3b15;
-        }
-
-        .task-item.overdue {
-            border-color: #ef444466;
-        }
-
-        .task-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .task-title-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 6px;
-        }
-
-        .task-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #f3f4f6;
-            word-break: break-word;
-        }
-
-        .task-item.completed .task-title {
-            text-decoration: line-through;
-            color: #9ca3af;
-        }
-
-        /* Task Note Box */
-        .task-note {
-            font-size: 13px;
-            color: #cbd5e1;
-            background-color: #030712aa;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border-left: 3px solid #38bdf8;
-            margin-bottom: 8px;
-            word-break: break-word;
-            white-space: pre-wrap;
-        }
-
-        .task-item.completed .task-note {
-            border-left-color: #64748b;
-            color: #94a3b8;
-        }
-
-        /* Badges */
-        .status-badge {
-            font-size: 10px;
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-pending {
-            background-color: #0284c722;
-            color: #38bdf8;
-            border: 1px solid #0284c744;
-        }
-
-        .badge-completed {
-            background-color: #10b98122;
-            color: #34d399;
-            border: 1px solid #10b98144;
-        }
-
-        .task-dates {
-            font-size: 12px;
-            color: #64748b;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .task-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-action {
-            background: none;
-            border: 1px solid #1e293b;
-            color: #94a3b8;
-            padding: 8px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .btn-check {
-            border-color: #10b98155;
-            color: #10b981;
-        }
-
-        .btn-check:hover, .btn-check.active-check {
-            background-color: #10b98122;
-        }
-
-        .btn-delete {
-            border-color: #ef444455;
-            color: #ef4444;
-        }
-
-        .btn-delete:hover {
-            background-color: #ef444422;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #64748b;
-        }
-
-        .empty-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
-            opacity: 0.6;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #030712; color: #f3f4f6; min-height: 100vh; padding: 20px 16px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 480px; }
+        .header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .brand-title { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+        .app-logo { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; background-color: #1e293b; }
+        h1 { font-size: 26px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; }
+        .subtitle { font-size: 13px; color: #94a3b8; font-weight: 400; }
+        .cloud-status { font-size: 12px; color: #38bdf8; background: #0b1329; border: 1px solid #1e293b; padding: 6px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .stat-card { background-color: #0b1329; border: 1px solid #1e293b; border-radius: 12px; padding: 14px 8px; text-align: center; }
+        .stat-number { font-size: 22px; font-weight: 700; color: #ffffff; margin-bottom: 4px; }
+        .stat-label { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+        .card { background-color: #0b1329; border: 1px solid #1e293b; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        .card-title { font-size: 15px; font-weight: 700; color: #38bdf8; margin-bottom: 16px; }
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
+        input[type="text"], input[type="date"], input[type="datetime-local"], textarea, select { width: 100%; padding: 12px 10px; background-color: #030712; border: 1px solid #1e293b; border-radius: 10px; color: #f3f4f6; font-size: 13px; outline: none; }
+        input[type="date"], input[type="datetime-local"] { color-scheme: dark; }
+        .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-primary { width: 100%; padding: 14px; background-color: #3b82f6; color: #ffffff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+        .controls-row { display: flex; gap: 10px; margin-bottom: 12px; }
+        .search-box { position: relative; flex: 1; }
+        .search-box input { padding-left: 36px; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; }
+        .sort-select-wrapper select { cursor: pointer; }
+        .filter-tabs { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 16px; padding-bottom: 4px; }
+        .tab { padding: 8px 16px; border-radius: 20px; background-color: #0b1329; border: 1px solid #1e293b; color: #94a3b8; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .tab.active { background-color: #3b82f6; color: #ffffff; border-color: #3b82f6; }
+        .task-list { display: flex; flex-direction: column; gap: 12px; }
+        .task-item { background-color: #0b1329; border: 1px solid #1e293b; border-radius: 14px; padding: 16px; display: flex; justify-content: space-between; gap: 12px; }
+        .task-item.completed { opacity: 0.75; border-color: #10b98144; background-color: #064e3b15; }
+        .task-item.overdue { border-color: #ef444466; }
+        .task-info { flex: 1; min-width: 0; }
+        .task-title { font-size: 16px; font-weight: 600; color: #f3f4f6; }
+        .task-item.completed .task-title { text-decoration: line-through; color: #9ca3af; }
+        .task-note { font-size: 13px; color: #cbd5e1; background-color: #030712aa; padding: 8px 12px; border-radius: 8px; border-left: 3px solid #38bdf8; margin: 6px 0; }
+        .status-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px; text-transform: uppercase; }
+        .badge-pending { background-color: #0284c722; color: #38bdf8; }
+        .badge-completed { background-color: #10b98122; color: #34d399; }
+        .task-dates { font-size: 12px; color: #64748b; display: flex; gap: 10px; }
+        .task-actions { display: flex; gap: 8px; }
+        .btn-action { background: none; border: 1px solid #1e293b; color: #94a3b8; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Header -->
         <header class="header">
             <div>
                 <div class="brand-title">
                     <img src="icon-192.png" alt="Logo" class="app-logo" onerror="this.style.display='none'">
                     <h1>Homework Tracker</h1>
                 </div>
-                <p class="subtitle">Intelligent Academic Tracker & Planner</p>
+                <p class="subtitle">Google Sheets Sync Enabled</p>
             </div>
-            <button id="btn-notification" class="btn-notify" onclick="toggleNotificationPermission()">
-                🔔 Notifications
-            </button>
+            <div id="cloud-status" class="cloud-status">☁️ Syncing...</div>
         </header>
 
-        <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number" id="total-count">0</div>
@@ -475,17 +83,16 @@
             </div>
         </div>
 
-        <!-- Form Card -->
         <div class="card">
             <div class="card-title">+ Create New Task</div>
             <form id="task-form">
                 <div class="form-group">
                     <label>Task Title / Subject</label>
-                    <input type="text" id="task-input" placeholder="e.g. Physics Ch. 5 Problems" required>
+                    <input type="text" id="task-input" placeholder="e.g. Math Homework" required>
                 </div>
                 <div class="form-group">
                     <label>Notes / Details (Optional)</label>
-                    <textarea id="task-note" rows="2" placeholder="e.g. Submit via Google Classroom / Group project"></textarea>
+                    <textarea id="task-note" rows="2" placeholder="e.g. Page 42 Ex. 1-10"></textarea>
                 </div>
                 <div class="date-row">
                     <div class="form-group">
@@ -501,22 +108,20 @@
             </form>
         </div>
 
-        <!-- Controls: Search & Sort -->
         <div class="controls-row">
             <div class="search-box">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="search-input" placeholder="Search tasks or notes...">
+                <input type="text" id="search-input" placeholder="Search tasks...">
             </div>
             <div class="sort-select-wrapper">
                 <select id="sort-select">
                     <option value="dueDate">⏰ Due Date</option>
                     <option value="assignedDate">📅 Assigned Date</option>
-                    <option value="newest">🆕 Newest Created</option>
+                    <option value="newest">🆕 Newest</option>
                 </select>
             </div>
         </div>
 
-        <!-- Filters -->
         <div class="filter-tabs">
             <button class="tab active" data-filter="all">All</button>
             <button class="tab" data-filter="pending">Pending</button>
@@ -524,259 +129,171 @@
             <button class="tab" data-filter="overdue">Overdue</button>
         </div>
 
-        <!-- Task List Area -->
         <div id="task-list" class="task-list"></div>
-
-        <!-- Empty State -->
         <div id="empty-state" class="empty-state">
-            <div class="empty-icon">⚙️</div>
-            <p>No tasks found. Add a new task above!</p>
+            <div style="font-size:32px;margin-bottom:8px;">⚙️</div>
+            <p>No tasks found.</p>
         </div>
     </div>
 
     <script>
+        // ⚠️ วาง Web App URL ที่ได้จากขั้นตอนที่ 3 ตรงนี้
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxYQXocEv4NOvd8wIzghSctVxklFz4AJ22RicWaFfyed4dn15_mMEF19IJHEO09780b/exec";
+
         let tasks = JSON.parse(localStorage.getItem('mcr_tasks')) || [];
         let currentFilter = 'all';
         let searchQuery = '';
         let currentSort = 'dueDate';
 
-        const taskForm = document.getElementById('task-form');
-        const taskInput = document.getElementById('task-input');
-        const taskNoteInput = document.getElementById('task-note');
-        const assignedDateInput = document.getElementById('assigned-date');
-        const dueDateInput = document.getElementById('due-date');
-        const searchInput = document.getElementById('search-input');
-        const sortSelect = document.getElementById('sort-select');
-        const filterTabs = document.querySelectorAll('.tab');
-        const taskList = document.getElementById('task-list');
-        const emptyState = document.getElementById('empty-state');
-        const btnNotification = document.getElementById('btn-notification');
+        const cloudStatus = document.getElementById('cloud-status');
 
-        function saveAndRender() {
-            localStorage.setItem('mcr_tasks', JSON.stringify(tasks));
-            renderTasks();
-            checkAndTriggerNotifications();
+        function updateCloudStatus(status) {
+            if (status === 'syncing') cloudStatus.innerHTML = '🔄 Syncing...';
+            else if (status === 'online') cloudStatus.innerHTML = '☁️ Synced to Sheets';
+            else if (status === 'error') cloudStatus.innerHTML = '⚠️ Offline Mode';
         }
 
-        function formatDateTimeDisplay(dtStr) {
-            if (!dtStr) return '';
-            if (dtStr.includes('T')) {
-                const [d, t] = dtStr.split('T');
-                return `${d} ${t}`;
+        async function fetchFromSheets() {
+            if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_URL_HERE")) {
+                updateCloudStatus('error');
+                return;
             }
-            return dtStr;
+            updateCloudStatus('syncing');
+            try {
+                const res = await fetch(SCRIPT_URL);
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    tasks = data;
+                    localStorage.setItem('mcr_tasks', JSON.stringify(tasks));
+                    updateCloudStatus('online');
+                    renderTasks();
+                }
+            } catch (err) {
+                console.error(err);
+                updateCloudStatus('error');
+            }
+        }
+
+        async function syncToSheets() {
+            localStorage.setItem('mcr_tasks', JSON.stringify(tasks));
+            renderTasks();
+
+            if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT_URL_HERE")) return;
+            
+            updateCloudStatus('syncing');
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: "syncAll", tasks: tasks })
+                });
+                updateCloudStatus('online');
+            } catch (err) {
+                console.error(err);
+                updateCloudStatus('error');
+            }
         }
 
         function renderTasks() {
-            const total = tasks.length;
-            const completedCount = tasks.filter(t => t.completed).length;
-            const pendingCount = total - completedCount;
-
-            document.getElementById('total-count').textContent = total;
-            document.getElementById('pending-count').textContent = pendingCount;
-            document.getElementById('completed-count').textContent = completedCount;
+            document.getElementById('total-count').textContent = tasks.length;
+            document.getElementById('pending-count').textContent = tasks.filter(t => !t.completed).length;
+            document.getElementById('completed-count').textContent = tasks.filter(t => t.completed).length;
 
             const nowIso = new Date().toISOString().slice(0, 16);
 
-            // 1. Filter Tasks
             let filteredTasks = tasks.filter(task => {
                 if (currentFilter === 'pending') return !task.completed;
                 if (currentFilter === 'completed') return task.completed;
-                if (currentFilter === 'overdue') {
-                    return !task.completed && task.dueDate && task.dueDate < nowIso;
-                }
+                if (currentFilter === 'overdue') return !task.completed && task.dueDate && task.dueDate < nowIso;
                 return true;
             });
 
-            // 2. Search
             if (searchQuery.trim() !== '') {
                 const q = searchQuery.toLowerCase().trim();
                 filteredTasks = filteredTasks.filter(task => 
-                    task.title.toLowerCase().includes(q) || 
-                    (task.note && task.note.toLowerCase().includes(q))
+                    task.title.toLowerCase().includes(q) || (task.note && task.note.toLowerCase().includes(q))
                 );
             }
 
-            // 3. Sort Tasks
             filteredTasks.sort((a, b) => {
-                if (currentSort === 'dueDate') {
-                    if (!a.dueDate) return 1;
-                    if (!b.dueDate) return -1;
-                    return a.dueDate.localeCompare(b.dueDate);
-                } else if (currentSort === 'assignedDate') {
-                    if (!a.assignedDate) return 1;
-                    if (!b.assignedDate) return -1;
-                    return b.assignedDate.localeCompare(a.assignedDate);
-                } else {
-                    return b.id - a.id;
-                }
+                if (currentSort === 'dueDate') return (a.dueDate || '').localeCompare(b.dueDate || '');
+                if (currentSort === 'assignedDate') return (b.assignedDate || '').localeCompare(a.assignedDate || '');
+                return b.id - a.id;
             });
 
-            // 4. Render
+            const taskList = document.getElementById('task-list');
+            const emptyState = document.getElementById('empty-state');
             taskList.innerHTML = '';
 
             if (filteredTasks.length === 0) {
                 emptyState.style.display = 'block';
             } else {
                 emptyState.style.display = 'none';
-
-                filteredTasks.forEach((task) => {
+                filteredTasks.forEach(task => {
                     const isOverdue = !task.completed && task.dueDate && task.dueDate < nowIso;
-                    
-                    const taskCard = document.createElement('div');
-                    taskCard.className = `task-item ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
-
-                    const assignedText = task.assignedDate ? `Assigned: ${task.assignedDate}` : '';
-                    const dueText = task.dueDate ? `Due: ${formatDateTimeDisplay(task.dueDate)}` : '';
-                    const noteHTML = task.note ? `<div class="task-note">📝 ${escapeHtml(task.note)}</div>` : '';
-
-                    taskCard.innerHTML = `
+                    const item = document.createElement('div');
+                    item.className = `task-item ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
+                    item.innerHTML = `
                         <div class="task-info">
-                            <div class="task-title-row">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
                                 <div class="task-title">${escapeHtml(task.title)}</div>
                                 <span class="status-badge ${task.completed ? 'badge-completed' : 'badge-pending'}">
                                     ${task.completed ? '✅ Completed' : '⏳ Pending'}
                                 </span>
                             </div>
-                            ${noteHTML}
+                            ${task.note ? `<div class="task-note">📝 ${escapeHtml(task.note)}</div>` : ''}
                             <div class="task-dates">
-                                ${assignedText ? `<span>📅 ${assignedText}</span>` : ''}
-                                ${dueText ? `<span style="color: ${isOverdue ? '#ef4444' : '#38bdf8'}; font-weight: ${isOverdue ? 'bold' : 'normal'};">⏰ ${dueText} ${isOverdue ? '(Overdue)' : ''}</span>` : ''}
+                                ${task.assignedDate ? `<span>📅 Assigned: ${task.assignedDate}</span>` : ''}
+                                ${task.dueDate ? `<span style="color:${isOverdue ? '#ef4444' : '#38bdf8'};">⏰ Due: ${task.dueDate.replace('T', ' ')} ${isOverdue ? '(Overdue)' : ''}</span>` : ''}
                             </div>
                         </div>
                         <div class="task-actions">
-                            <button class="btn-action btn-check ${task.completed ? 'active-check' : ''}" onclick="toggleTask(${task.id})" title="${task.completed ? 'Mark as Pending' : 'Mark as Completed'}">
-                                ${task.completed ? '↩️' : '✓'}
-                            </button>
-                            <button class="btn-action btn-delete" onclick="deleteTask(${task.id})" title="Delete Task">
-                                🗑️
-                            </button>
+                            <button class="btn-action" onclick="toggleTask(${task.id})">${task.completed ? '↩️' : '✓'}</button>
+                            <button class="btn-action" onclick="deleteTask(${task.id})">🗑️</button>
                         </div>
                     `;
-
-                    taskList.appendChild(taskCard);
+                    taskList.appendChild(item);
                 });
             }
         }
 
-        // Form Submit
-        taskForm.addEventListener('submit', (e) => {
+        document.getElementById('task-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            
-            const newTask = {
+            tasks.unshift({
                 id: Date.now(),
-                title: taskInput.value.trim(),
-                note: taskNoteInput.value.trim(),
-                assignedDate: assignedDateInput.value,
-                dueDate: dueDateInput.value,
-                completed: false,
-                notified: false
-            };
-
-            tasks.unshift(newTask);
-            saveAndRender();
-
-            taskInput.value = '';
-            taskNoteInput.value = '';
-            assignedDateInput.value = '';
-            dueDateInput.value = '';
+                title: document.getElementById('task-input').value.trim(),
+                note: document.getElementById('task-note').value.trim(),
+                assignedDate: document.getElementById('assigned-date').value,
+                dueDate: document.getElementById('due-date').value,
+                completed: false
+            });
+            syncToSheets();
+            document.getElementById('task-input').value = '';
+            document.getElementById('task-note').value = '';
+            document.getElementById('assigned-date').value = '';
+            document.getElementById('due-date').value = '';
         });
 
-        // Search Input
-        searchInput.addEventListener('input', (e) => {
-            searchQuery = e.target.value;
-            renderTasks();
-        });
-
-        // Sort Select
-        sortSelect.addEventListener('change', (e) => {
-            currentSort = e.target.value;
-            renderTasks();
-        });
-
-        // Filter Tabs
-        filterTabs.forEach(tab => {
+        document.getElementById('search-input').addEventListener('input', (e) => { searchQuery = e.target.value; renderTasks(); });
+        document.getElementById('sort-select').addEventListener('change', (e) => { currentSort = e.target.value; renderTasks(); });
+        document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
-                filterTabs.forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 currentFilter = tab.getAttribute('data-filter');
                 renderTasks();
             });
         });
 
-        // Toggle Task Complete
         window.toggleTask = function(id) {
             const task = tasks.find(t => t.id === id);
-            if (task) {
-                task.completed = !task.completed;
-                saveAndRender();
-            }
+            if (task) { task.completed = !task.completed; syncToSheets(); }
         };
 
-        // Delete Task
         window.deleteTask = function(id) {
-            if (confirm('Are you sure you want to delete this task?')) {
-                tasks = tasks.filter(t => t.id !== id);
-                saveAndRender();
-            }
+            if (confirm('Delete this task?')) { tasks = tasks.filter(t => t.id !== id); syncToSheets(); }
         };
-
-        // Notification Handler
-        function updateNotificationBtnState() {
-            if (!("Notification" in window)) {
-                btnNotification.style.display = "none";
-                return;
-            }
-            if (Notification.permission === "granted") {
-                btnNotification.classList.add("active");
-                btnNotification.innerHTML = "🔔 Notifications On";
-            } else {
-                btnNotification.classList.remove("active");
-                btnNotification.innerHTML = "🔔 Notifications";
-            }
-        }
-
-        window.toggleNotificationPermission = function() {
-            if (!("Notification" in window)) {
-                alert("Your browser does not support notifications.");
-                return;
-            }
-
-            if (Notification.permission === "granted") {
-                alert("Notifications are already enabled!");
-            } else if (Notification.permission !== "denied") {
-                Notification.requestPermission().then(permission => {
-                    updateNotificationBtnState();
-                    if (permission === "granted") {
-                        new Notification("Homework Tracker", {
-                            body: "Notifications enabled successfully!",
-                            icon: "icon-192.png"
-                        });
-                    }
-                });
-            } else {
-                alert("Please enable notification permissions in your browser settings.");
-            }
-        };
-
-        function checkAndTriggerNotifications() {
-            if (!("Notification" in window) || Notification.permission !== "granted") return;
-
-            const nowIso = new Date().toISOString().slice(0, 16);
-
-            tasks.forEach(task => {
-                if (!task.completed && task.dueDate && !task.notified) {
-                    if (task.dueDate <= nowIso) {
-                        new Notification(`⏰ Homework Due: ${task.title}`, {
-                            body: `Due: ${formatDateTimeDisplay(task.dueDate)}\n${task.note || ''}`,
-                            icon: "icon-192.png"
-                        });
-                        task.notified = true;
-                        localStorage.setItem('mcr_tasks', JSON.stringify(tasks));
-                    }
-                }
-            });
-        }
 
         function escapeHtml(text) {
             const div = document.createElement('div');
@@ -784,20 +301,8 @@
             return div.innerHTML;
         }
 
-        // Init
-        updateNotificationBtnState();
         renderTasks();
-
-        // Check notifications every minute
-        setInterval(checkAndTriggerNotifications, 60000);
-
-        // Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .catch(err => console.log('SW registration failed: ', err));
-            });
-        }
+        fetchFromSheets();
     </script>
 </body>
 </html>
