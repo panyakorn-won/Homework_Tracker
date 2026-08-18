@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <title>MCR Demo</title>
+    <title>Homework Tracker</title>
     <meta name="description" content="Homework Tracker - Intelligent Academic Tracker & Planner">
     
     <meta property="og:type" content="website">
-    <meta property="og:title" content="MCR Demo">
+    <meta property="og:title" content="Homework Tracker">
     <meta property="og:description" content="Homework Tracker - Intelligent Academic Tracker & Planner">
     <meta property="og:url" content="https://panyakorn-won.github.io/Homework_Tracker/">
     <meta property="og:image" content="https://panyakorn-won.github.io/Homework_Tracker/icon-512.png">
@@ -45,7 +45,10 @@
 
         /* Header & Logo */
         .header {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
 
         .brand-title {
@@ -64,16 +67,37 @@
         }
 
         h1 {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 800;
             color: #ffffff;
             letter-spacing: -0.5px;
         }
 
         .subtitle {
-            font-size: 14px;
+            font-size: 13px;
             color: #94a3b8;
             font-weight: 400;
+        }
+
+        .btn-notify {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            color: #f8fafc;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-notify.active {
+            background-color: #0284c722;
+            border-color: #38bdf8;
+            color: #38bdf8;
         }
 
         /* Stats Cards */
@@ -81,7 +105,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
@@ -128,7 +152,7 @@
 
         .form-group {
             margin-bottom: 14px;
-            min-width: 0; /* ป้องกันการล้นขอบใน iOS Safari */
+            min-width: 0;
         }
 
         label {
@@ -141,7 +165,7 @@
             letter-spacing: 0.5px;
         }
 
-        input[type="text"], input[type="date"], textarea {
+        input[type="text"], input[type="date"], input[type="datetime-local"], textarea, select {
             width: 100%;
             min-width: 0;
             max-width: 100%;
@@ -158,7 +182,7 @@
             appearance: none;
         }
 
-        input[type="date"] {
+        input[type="date"], input[type="datetime-local"] {
             min-height: 44px;
             color-scheme: dark;
         }
@@ -169,7 +193,7 @@
             font-size: 14px;
         }
 
-        input:focus, textarea:focus {
+        input:focus, textarea:focus, select:focus {
             border-color: #3b82f6;
         }
 
@@ -198,15 +222,21 @@
             background-color: #2563eb;
         }
 
-        /* Search & Filters */
+        /* Controls Section (Search, Sort, Filters) */
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
         .search-box {
             position: relative;
-            margin-bottom: 14px;
+            flex: 1;
         }
 
         .search-box input {
-            padding-left: 38px;
-            font-size: 14px;
+            padding-left: 36px;
+            font-size: 13px;
         }
 
         .search-icon {
@@ -215,6 +245,20 @@
             top: 50%;
             transform: translateY(-50%);
             color: #64748b;
+        }
+
+        .sort-select-wrapper {
+            width: 140px;
+            position: relative;
+        }
+
+        .sort-select-wrapper select {
+            padding-right: 24px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%3C%2394a3b8' %3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 14px;
+            cursor: pointer;
         }
 
         .filter-tabs {
@@ -402,11 +446,16 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <div class="brand-title">
-                <img src="icon-192.png" alt="Logo" class="app-logo" onerror="this.style.display='none'">
-                <h1>Homework Tracker</h1>
+            <div>
+                <div class="brand-title">
+                    <img src="icon-192.png" alt="Logo" class="app-logo" onerror="this.style.display='none'">
+                    <h1>Homework Tracker</h1>
+                </div>
+                <p class="subtitle">Intelligent Academic Tracker & Planner</p>
             </div>
-            <p class="subtitle">Intelligent Academic Tracker & Planner</p>
+            <button id="btn-notification" class="btn-notify" onclick="toggleNotificationPermission()">
+                🔔 แจ้งเตือน
+            </button>
         </header>
 
         <!-- Stats -->
@@ -443,20 +492,30 @@
                         <input type="date" id="assigned-date">
                     </div>
                     <div class="form-group">
-                        <label>Due Date</label>
-                        <input type="date" id="due-date">
+                        <label>Due Date & Time</label>
+                        <input type="datetime-local" id="due-date">
                     </div>
                 </div>
                 <button type="submit" class="btn-primary">Save Task</button>
             </form>
         </div>
 
-        <!-- Search & Filters -->
-        <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="search-input" placeholder="Search tasks or notes...">
+        <!-- Controls: Search & Sort -->
+        <div class="controls-row">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Search tasks...">
+            </div>
+            <div class="sort-select-wrapper">
+                <select id="sort-select">
+                    <option value="dueDate">⏰ วันส่งใกล้สุด</option>
+                    <option value="assignedDate">📅 วันสั่งใกล้สุด</option>
+                    <option value="newest">🆕 สร้างล่าสุด</option>
+                </select>
+            </div>
         </div>
 
+        <!-- Filters -->
         <div class="filter-tabs">
             <button class="tab active" data-filter="all">All</button>
             <button class="tab" data-filter="pending">Pending</button>
@@ -475,10 +534,10 @@
     </div>
 
     <script>
-        // โหลดข้อมูลการบ้านจาก LocalStorage
         let tasks = JSON.parse(localStorage.getItem('mcr_tasks')) || [];
         let currentFilter = 'all';
         let searchQuery = '';
+        let currentSort = 'dueDate';
 
         const taskForm = document.getElementById('task-form');
         const taskInput = document.getElementById('task-input');
@@ -486,19 +545,28 @@
         const assignedDateInput = document.getElementById('assigned-date');
         const dueDateInput = document.getElementById('due-date');
         const searchInput = document.getElementById('search-input');
+        const sortSelect = document.getElementById('sort-select');
         const filterTabs = document.querySelectorAll('.tab');
         const taskList = document.getElementById('task-list');
         const emptyState = document.getElementById('empty-state');
+        const btnNotification = document.getElementById('btn-notification');
 
-        // ฟังก์ชัน บันทึก และ แสดงผล
         function saveAndRender() {
             localStorage.setItem('mcr_tasks', JSON.stringify(tasks));
             renderTasks();
+            checkAndTriggerNotifications();
         }
 
-        // ฟังก์ชัน วาดตารางการบ้าน
+        function formatDateTimeDisplay(dtStr) {
+            if (!dtStr) return '';
+            if (dtStr.includes('T')) {
+                const [d, t] = dtStr.split('T');
+                return `${d} ${t}`;
+            }
+            return dtStr;
+        }
+
         function renderTasks() {
-            // 1. คำนวณและอัปเดตตัวเลข Stats
             const total = tasks.length;
             const completedCount = tasks.filter(t => t.completed).length;
             const pendingCount = total - completedCount;
@@ -507,19 +575,20 @@
             document.getElementById('pending-count').textContent = pendingCount;
             document.getElementById('completed-count').textContent = completedCount;
 
+            const nowIso = new Date().toISOString().slice(0, 16);
             const todayStr = new Date().toISOString().split('T')[0];
 
-            // 2. กรองข้อมูลตาม Filter
+            // 1. Filter Tasks
             let filteredTasks = tasks.filter(task => {
                 if (currentFilter === 'pending') return !task.completed;
                 if (currentFilter === 'completed') return task.completed;
                 if (currentFilter === 'overdue') {
-                    return !task.completed && task.dueDate && task.dueDate < todayStr;
+                    return !task.completed && task.dueDate && task.dueDate < nowIso;
                 }
                 return true;
             });
 
-            // 3. กรองตาม Search Query
+            // 2. Search
             if (searchQuery.trim() !== '') {
                 const q = searchQuery.toLowerCase().trim();
                 filteredTasks = filteredTasks.filter(task => 
@@ -528,7 +597,22 @@
                 );
             }
 
-            // 4. แสดงผลรายการการบ้าน
+            // 3. Sort Tasks
+            filteredTasks.sort((a, b) => {
+                if (currentSort === 'dueDate') {
+                    if (!a.dueDate) return 1;
+                    if (!b.dueDate) return -1;
+                    return a.dueDate.localeCompare(b.dueDate);
+                } else if (currentSort === 'assignedDate') {
+                    if (!a.assignedDate) return 1;
+                    if (!b.assignedDate) return -1;
+                    return b.assignedDate.localeCompare(a.assignedDate);
+                } else {
+                    return b.id - a.id;
+                }
+            });
+
+            // 4. Render
             taskList.innerHTML = '';
 
             if (filteredTasks.length === 0) {
@@ -537,13 +621,13 @@
                 emptyState.style.display = 'none';
 
                 filteredTasks.forEach((task) => {
-                    const isOverdue = !task.completed && task.dueDate && task.dueDate < todayStr;
+                    const isOverdue = !task.completed && task.dueDate && task.dueDate < nowIso;
                     
                     const taskCard = document.createElement('div');
                     taskCard.className = `task-item ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
 
                     const assignedText = task.assignedDate ? `สั่ง: ${task.assignedDate}` : '';
-                    const dueText = task.dueDate ? `ส่ง: ${task.dueDate}` : '';
+                    const dueText = task.dueDate ? `ส่ง: ${formatDateTimeDisplay(task.dueDate)}` : '';
                     const noteHTML = task.note ? `<div class="task-note">📝 ${escapeHtml(task.note)}</div>` : '';
 
                     taskCard.innerHTML = `
@@ -575,7 +659,7 @@
             }
         }
 
-        // เพิ่มการบ้านใหม่
+        // Form Submit
         taskForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
@@ -585,13 +669,13 @@
                 note: taskNoteInput.value.trim(),
                 assignedDate: assignedDateInput.value,
                 dueDate: dueDateInput.value,
-                completed: false
+                completed: false,
+                notified: false
             };
 
             tasks.unshift(newTask);
             saveAndRender();
 
-            // เคลียร์ค่าในช่องป้อน
             taskInput.value = '';
             taskNoteInput.value = '';
             assignedDateInput.value = '';
@@ -601,6 +685,12 @@
         // Search Input
         searchInput.addEventListener('input', (e) => {
             searchQuery = e.target.value;
+            renderTasks();
+        });
+
+        // Sort Select
+        sortSelect.addEventListener('change', (e) => {
+            currentSort = e.target.value;
             renderTasks();
         });
 
@@ -614,7 +704,7 @@
             });
         });
 
-        // สลับสถานะ (Pending <-> Completed)
+        // Toggle Task Complete
         window.toggleTask = function(id) {
             const task = tasks.find(t => t.id === id);
             if (task) {
@@ -623,7 +713,7 @@
             }
         };
 
-        // ลบรายการ
+        // Delete Task
         window.deleteTask = function(id) {
             if (confirm('คุณต้องการลบรายการการบ้านนี้ใช่หรือไม่?')) {
                 tasks = tasks.filter(t => t.id !== id);
@@ -631,16 +721,77 @@
             }
         };
 
+        // Notification API Handler
+        function updateNotificationBtnState() {
+            if (!("Notification" in window)) {
+                btnNotification.style.display = "none";
+                return;
+            }
+            if (Notification.permission === "granted") {
+                btnNotification.classList.add("active");
+                btnNotification.innerHTML = "🔔 เปิดแจ้งเตือนแล้ว";
+            } else {
+                btnNotification.classList.remove("active");
+                btnNotification.innerHTML = "🔔 เปิดการแจ้งเตือน";
+            }
+        }
+
+        window.toggleNotificationPermission = function() {
+            if (!("Notification" in window)) {
+                alert("เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน");
+                return;
+            }
+
+            if (Notification.permission === "granted") {
+                alert("เปิดการแจ้งเตือนเรียบร้อยแล้ว");
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    updateNotificationBtnState();
+                    if (permission === "granted") {
+                        new Notification("Homework Tracker", {
+                            body: "เปิดการแจ้งเตือนการบ้านสำเร็จแล้ว!",
+                            icon: "icon-192.png"
+                        });
+                    }
+                });
+            } else {
+                alert("กรุณาเปิดการอนุญาตการแจ้งเตือนในตั้งค่าเบราว์เซอร์ของคุณ");
+            }
+        };
+
+        function checkAndTriggerNotifications() {
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+            const nowIso = new Date().toISOString().slice(0, 16);
+
+            tasks.forEach(task => {
+                if (!task.completed && task.dueDate && !task.notified) {
+                    if (task.dueDate <= nowIso) {
+                        new Notification(`⏰ ถึงกำหนดส่งการบ้าน: ${task.title}`, {
+                            body: `กำหนดส่ง: ${formatDateTimeDisplay(task.dueDate)}\n${task.note || ''}`,
+                            icon: "icon-192.png"
+                        });
+                        task.notified = true;
+                        localStorage.setItem('mcr_tasks', JSON.stringify(tasks));
+                    }
+                }
+            });
+        }
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        // แสดงผลครั้งแรก
+        // Init
+        updateNotificationBtnState();
         renderTasks();
 
-        // Register Service Worker
+        // Periodically check notifications every 1 minute
+        setInterval(checkAndTriggerNotifications, 60000);
+
+        // Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
