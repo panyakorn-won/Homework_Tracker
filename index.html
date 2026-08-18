@@ -128,6 +128,7 @@
 
         .form-group {
             margin-bottom: 14px;
+            min-width: 0; /* ป้องกันการล้นขอบใน iOS Safari */
         }
 
         label {
@@ -142,19 +143,30 @@
 
         input[type="text"], input[type="date"], textarea {
             width: 100%;
-            padding: 12px 14px;
+            min-width: 0;
+            max-width: 100%;
+            padding: 12px 10px;
             background-color: #030712;
             border: 1px solid #1e293b;
             border-radius: 10px;
             color: #f3f4f6;
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
             transition: border-color 0.2s;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="date"] {
+            min-height: 44px;
+            color-scheme: dark;
         }
 
         textarea {
             resize: vertical;
             min-height: 64px;
+            font-size: 14px;
         }
 
         input:focus, textarea:focus {
@@ -165,6 +177,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
+            width: 100%;
         }
 
         .btn-primary {
@@ -193,6 +206,7 @@
 
         .search-box input {
             padding-left: 38px;
+            font-size: 14px;
         }
 
         .search-icon {
@@ -261,6 +275,7 @@
 
         .task-info {
             flex: 1;
+            min-width: 0;
         }
 
         .task-title-row {
@@ -504,7 +519,7 @@
                 return true;
             });
 
-            // 3. กรองตาม Search Query (ค้นหาได้ทั้งชื่อวิชา และ Note)
+            // 3. กรองตาม Search Query
             if (searchQuery.trim() !== '') {
                 const q = searchQuery.toLowerCase().trim();
                 filteredTasks = filteredTasks.filter(task => 
