@@ -4,19 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- ข้อความพรีวิวเวลาส่งลิงก์ -->
     <title>MCR Demo</title>
     <meta name="description" content="Homework Tracker - Intelligent Academic Tracker & Planner">
     
-    <!-- Open Graph สำหรับ LINE / Facebook / แอปแชท -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="MCR Demo">
     <meta property="og:description" content="Homework Tracker - Intelligent Academic Tracker & Planner">
     <meta property="og:url" content="https://panyakorn-won.github.io/Homework_Tracker/">
-    <!-- ⚠️ ลิงก์รูปภาพแบบเต็มสำหรับพรีวิว -->
     <meta property="og:image" content="https://panyakorn-won.github.io/Homework_Tracker/icon-512.png">
     
-    <!-- ไอคอนบน iPhone และเว็บ -->
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -184,48 +180,92 @@
             background-color: #2563eb;
         }
 
-        /* Search & Filters */
-        .search-box {
-            position: relative;
-            margin-bottom: 14px;
-        }
-
-        .search-box input {
-            padding-left: 38px;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #64748b;
-        }
-
-        .filter-tabs {
+        /* Task List Container */
+        .task-list {
             display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            margin-bottom: 20px;
-            padding-bottom: 4px;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
         }
 
-        .tab {
-            padding: 8px 16px;
-            border-radius: 20px;
+        .task-item {
             background-color: #0b1329;
             border: 1px solid #1e293b;
-            color: #94a3b8;
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-            cursor: pointer;
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            transition: all 0.2s;
         }
 
-        .tab.active {
-            background-color: #3b82f6;
-            color: #ffffff;
-            border-color: #3b82f6;
+        .task-item.completed {
+            opacity: 0.6;
+            border-color: #10b98133;
+            background-color: #064e3b11;
+        }
+
+        .task-info {
+            flex: 1;
+        }
+
+        .task-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f3f4f6;
+            margin-bottom: 6px;
+            word-break: break-word;
+        }
+
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+
+        .task-dates {
+            font-size: 12px;
+            color: #64748b;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            background: none;
+            border: 1px solid #1e293b;
+            color: #94a3b8;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-check {
+            border-color: #10b98155;
+            color: #10b981;
+        }
+
+        .btn-check:hover {
+            background-color: #10b98122;
+        }
+
+        .btn-delete {
+            border-color: #ef444455;
+            color: #ef4444;
+        }
+
+        .btn-delete:hover {
+            background-color: #ef444422;
         }
 
         /* Empty State */
@@ -248,7 +288,6 @@
         <!-- Header -->
         <header class="header">
             <div class="brand-title">
-                <!-- โหลดไอคอนจากไฟล์ icon-192.png -->
                 <img src="icon-192.png" alt="Logo" class="app-logo" onerror="this.style.display='none'">
                 <h1>Homework Tracker</h1>
             </div>
@@ -277,43 +316,144 @@
             <form id="task-form">
                 <div class="form-group">
                     <label>Task Title / Subject</label>
-                    <input type="text" placeholder="e.g. Physics Ch. 5 Problems" required>
+                    <input type="text" id="task-input" placeholder="e.g. Physics Ch. 5 Problems" required>
                 </div>
                 <div class="date-row">
                     <div class="form-group">
                         <label>Assigned Date</label>
-                        <input type="date">
+                        <input type="date" id="assigned-date">
                     </div>
                     <div class="form-group">
                         <label>Due Date</label>
-                        <input type="date">
+                        <input type="date" id="due-date">
                     </div>
                 </div>
                 <button type="submit" class="btn-primary">Save Task</button>
             </form>
         </div>
 
-        <!-- Search & Filters -->
-        <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" placeholder="Search tasks...">
-        </div>
+        <!-- Task List Area -->
+        <div id="task-list" class="task-list"></div>
 
-        <div class="filter-tabs">
-            <button class="tab active">All</button>
-            <button class="tab">Pending</button>
-            <button class="tab">Completed</button>
-            <button class="tab">Overdue</button>
-        </div>
-
-        <!-- Empty List -->
-        <div class="empty-state">
+        <!-- Empty State (จะซ่อนอัตโนมัติเมื่อมีรายการการบ้าน) -->
+        <div id="empty-state" class="empty-state">
             <div class="empty-icon">⚙️</div>
             <p>No tasks found. Add a new task above!</p>
         </div>
     </div>
 
     <script>
+        // โหลดข้อมูลการบ้านจาก LocalStorage
+        let tasks = JSON.parse(localStorage.getItem('mcr_tasks')) || [];
+
+        const taskForm = document.getElementById('task-form');
+        const taskInput = document.getElementById('task-input');
+        const assignedDateInput = document.getElementById('assigned-date');
+        const dueDateInput = document.getElementById('due-date');
+        const taskList = document.getElementById('task-list');
+        const emptyState = document.getElementById('empty-state');
+
+        // ฟังก์ชัน บันทึก และ อัปเดตการแสดงผล
+        function saveAndRender() {
+            localStorage.setItem('mcr_tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        // ฟังก์ชัน วาดตารางการบ้านบนหน้าจอ
+        function renderTasks() {
+            taskList.innerHTML = '';
+
+            // อัปเดตตัวเลข Stats
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const pending = total - completed;
+
+            document.getElementById('total-count').textContent = total;
+            document.getElementById('pending-count').textContent = pending;
+            document.getElementById('completed-count').textContent = completed;
+
+            // แสดง/ซ่อน Empty State
+            if (tasks.length === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+            }
+
+            // แสดงรายการการบ้านแต่ละรายการ
+            tasks.forEach((task, index) => {
+                const taskCard = document.createElement('div');
+                taskCard.className = `task-item ${task.completed ? 'completed' : ''}`;
+
+                const assignedText = task.assignedDate ? `สั่ง: ${task.assignedDate}` : '';
+                const dueText = task.dueDate ? `ส่ง: ${task.dueDate}` : '';
+
+                taskCard.innerHTML = `
+                    <div class="task-info">
+                        <div class="task-title">${escapeHtml(task.title)}</div>
+                        <div class="task-dates">
+                            ${assignedText ? `<span>📅 ${assignedText}</span>` : ''}
+                            ${dueText ? `<span style="color: #38bdf8;">⏰ ${dueText}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn-action btn-check" onclick="toggleTask(${index})" title="ทำเสร็จแล้ว">
+                            ${task.completed ? '↩️' : '✓'}
+                        </button>
+                        <button class="btn-action btn-delete" onclick="deleteTask(${index})" title="ลบรายการ">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+
+                taskList.appendChild(taskCard);
+            });
+        }
+
+        // เพิ่มการบ้านใหม่
+        taskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const newTask = {
+                title: taskInput.value.trim(),
+                assignedDate: assignedDateInput.value,
+                dueDate: dueDateInput.value,
+                completed: false,
+                id: Date.now()
+            };
+
+            tasks.unshift(newTask); // เพิ่มรายการใหม่ไว้บนสุด
+            saveAndRender();
+
+            // เคลียร์ค่าในช่องป้อนข้อมูล
+            taskInput.value = '';
+            assignedDateInput.value = '';
+            dueDateInput.value = '';
+        });
+
+        // สลับสถานะ ทำเสร็จแล้ว / ยังไม่เสร็จ
+        window.toggleTask = function(index) {
+            tasks[index].completed = !tasks[index].completed;
+            saveAndRender();
+        };
+
+        // ลบรายการการบ้าน
+        window.deleteTask = function(index) {
+            if (confirm('คุณต้องการลบรายการการบ้านนี้ใช่หรือไม่?')) {
+                tasks.splice(index, 1);
+                saveAndRender();
+            }
+        };
+
+        // ฟังก์ชันป้องกันตัวอักษรแปลกปลอม (Security)
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // แสดงผลครั้งแรกเมื่อเปิดหน้าเว็บ
+        renderTasks();
+
         // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
