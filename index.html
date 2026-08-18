@@ -21,7 +21,7 @@
     <meta name="theme-color" content="#030712">
 
     <style>
-        * {
+        * { 
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -759,23 +759,67 @@
             }
         };
 
+        // ฟังก์ชันส่ง Notification Centralized
+        function sendNotification(title, task) {
+            const options = {
+                body: `กำหนดส่ง: ${formatDateTimeDisplay(task.dueDate)}\n${task.note ? '📝 ' + task.note : ''}`,
+                icon: "icon-192.png",
+                vibrate: [200, 100, 200],
+                tag: `task-${task.id}`
+            };
+
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification(title, options);
+                });
+            } else {
+                new Notification(title, options);
+            }
+        }
+
+        // ฟังก์ชันเช็กเวลาและสั่งแจ้งเตือนล่วงหน้า
         function checkAndTriggerNotifications() {
             if (!("Notification" in window) || Notification.permission !== "granted") return;
 
-            const nowIso = new Date().toISOString().slice(0, 16);
+            const now = new Date().getTime();
+            const ONE_HOUR = 60 * 60 * 1000;
+            const ONE_DAY = 24 * ONE_HOUR;
+
+            let hasChanges = false;
 
             tasks.forEach(task => {
-                if (!task.completed && task.dueDate && !task.notified) {
-                    if (task.dueDate <= nowIso) {
-                        new Notification(`⏰ Homework Due: ${task.title}`, {
-                            body: `Due: ${formatDateTimeDisplay(task.dueDate)}\n${task.note || ''}`,
-                            icon: "icon-192.png"
-                        });
-                        task.notified = true;
-                        localStorage.setItem('mcr_tasks', JSON.stringify(tasks));
-                    }
+                if (task.completed || !task.dueDate) return;
+
+                const taskDueDate = new Date(task.dueDate).getTime();
+                if (isNaN(taskDueDate)) return;
+
+                const timeDiff = taskDueDate - now;
+
+                // 1. แจ้งเตือนล่วงหน้า 1 วัน
+                if (timeDiff <= ONE_DAY && timeDiff > ONE_HOUR && !task.notified1Day) {
+                    sendNotification(`⚠️ อีก 1 วันครบกำหนดส่ง: ${task.title}`, task);
+                    task.notified1Day = true;
+                    hasChanges = true;
+                }
+
+                // 2. แจ้งเตือนล่วงหน้า 1 ชั่วโมง
+                if (timeDiff <= ONE_HOUR && timeDiff > 0 && !task.notified1Hour) {
+                    sendNotification(`🚨 รีบทำด่วน! เหลืออีก 1 ชม.: ${task.title}`, task);
+                    task.notified1Hour = true;
+                    hasChanges = true;
+                }
+
+                // 3. แจ้งเตือนเมื่อถึงกำหนดส่ง
+                if (timeDiff <= 0 && !task.notified) {
+                    sendNotification(`⏰ ถึงกำหนดส่งแล้ว!: ${task.title}`, task);
+                    task.notified = true;
+                    hasChanges = true;
                 }
             });
+
+            if (hasChanges) {
+                localStorage.setItem('mcr_tasks', JSON.stringify(tasks));
+            }
         }
 
         function escapeHtml(text) {
