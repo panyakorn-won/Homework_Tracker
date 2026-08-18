@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>สมุดการบ้าน</title>
+<meta name="description" content="แอปติดตามการบ้าน: ชื่อการบ้าน สถานะ วันที่สั่ง วันที่กำหนดส่ง">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3B5BA5">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="สมุดการบ้าน">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#FAF6EE;
+    --paper-line:#E3DCC8;
+    --ink:#2B2A28;
+    --ink-soft:#6b6558;
+    --blue:#3B5BA5;
+    --blue-deep:#2c4585;
+    --green:#4F7942;
+    --green-soft:#e7efe2;
+    --red:#C1502E;
+    --red-soft:#f6e6e0;
+    --khaki:#A79B84;
+    --radius:14px;
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+
+  body{
+    margin:0;
+    background:var(--blue);
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(255,255,255,0.06), transparent 40%),
+      radial-gradient(circle at 85% 92%, rgba(255,255,255,0.05), transparent 40%);
+    min-height:100vh;
+    font-family:'Inter', -apple-system, sans-serif;
+    color:var(--ink);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+
+  .app{
+    max-width:520px;
+    margin:0 auto;
+    padding:0 0 40px;
+  }
+
+  /* Header - like a notebook cover strip */
+  header{
+    padding:calc(env(safe-area-inset-top) + 22px) 22px 22px;
+    color:var(--paper);
+  }
+  header h1{
+    font-family:'Kalam', cursive;
+    font-size:2rem;
+    margin:0 0 2px;
+    letter-spacing:0.3px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  header p{
+    margin:0;
+    font-size:0.85rem;
+    opacity:0.85;
+    font-weight:500;
+  }
+
+  /* Notebook page */
+  .page{
+    background:var(--paper);
+    border-radius:20px 20px 0 0;
+    box-shadow:0 -2px 20px rgba(0,0,0,0.15);
+    position:relative;
+    padding:26px 20px 10px;
+    min-height:60vh;
+  }
+  .spiral{
+    display:flex;
+    justify-content:space-evenly;
+    position:absolute;
+    top:-11px;
+    left:24px;
+    right:24px;
+  }
+  .spiral span{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:var(--khaki);
+    box-shadow:inset 0 2px 3px rgba(0,0,0,0.25);
+  }
+
+  /* Form card */
+  form{
+    background:#fff;
+    border:1px solid var(--paper-line);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:22px;
+    box-shadow:0 3px 0 var(--paper-line);
+  }
+  form h2{
+    font-family:'Kalam', cursive;
+    font-size:1.2rem;
+    margin:0 0 12px;
+    color:var(--blue-deep);
+  }
+  .field{
+    margin-bottom:12px;
+  }
+  .field label{
+    display:block;
+    font-size:0.72rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .field input{
+    width:100%;
+    border:1.5px solid var(--paper-line);
+    border-radius:9px;
+    padding:10px 12px;
+    font-size:1rem;
+    font-family:'Inter', sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .field input:focus{
+    outline:none;
+    border-color:var(--blue);
+    background:#fff;
+  }
+  .row2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .add-btn{
+    width:100%;
+    border:none;
+    background:var(--blue);
+    color:#fff;
+    font-family:'Inter', sans-serif;
+    font-weight:700;
+    font-size:0.95rem;
+    padding:12px;
+    border-radius:9px;
+    cursor:pointer;
+    box-shadow:0 3px 0 var(--blue-deep);
+    transition:transform 0.06s ease;
+  }
+  .add-btn:active{
+    transform:translateY(2px);
+    box-shadow:0 1px 0 var(--blue-deep);
+  }
+
+  /* Filters */
+  .filters{
+    display:flex;
+    gap:8px;
+    margin-bottom:16px;
+    overflow-x:auto;
+    padding-bottom:2px;
+  }
+  .filter-btn{
+    border:1.5px solid var(--paper-line);
+    background:#fff;
+    color:var(--ink-soft);
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:0.8rem;
+    padding:7px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .filter-btn.active{
+    background:var(--blue);
+    border-color:var(--blue);
+    color:#fff;
+  }
+
+  /* List */
+  .list{
+    list-style:none;
+    margin:0;
+    padding:0;
+  }
+  .item{
+    position:relative;
+    background:#fff;
+    border:1px solid var(--paper-line);
+    border-left:5px solid var(--khaki);
+    border-radius:10px;
+    padding:14px 14px 14px 14px;
+    margin-bottom:12px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .item.done{ border-left-color:var(--green); opacity:0.75; }
+  .item.overdue{ border-left-color:var(--red); }
+
+  .check{
+    flex:0 0 auto;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:2px solid var(--khaki);
+    background:#fff;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:2px;
+  }
+  .item.done .check{
+    background:var(--green);
+    border-color:var(--green);
+    color:#fff;
+    font-weight:700;
+  }
+
+  .item-body{ flex:1; min-width:0; }
+  .item-title{
+    font-weight:700;
+    font-size:1rem;
+    margin:0 0 4px;
+    word-break:break-word;
+  }
+  .item.done .item-title{
+    text-decoration:line-through;
+    color:var(--ink-soft);
+  }
+  .item-dates{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 10px;
+    font-family:'Space Mono', monospace;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+  }
+  .item-dates b{ color:var(--ink); font-weight:700; }
+
+  .badge{
+    display:inline-block;
+    margin-top:6px;
+    font-family:'Kalam', cursive;
+    font-size:0.72rem;
+    font-weight:700;
+    padding:2px 9px;
+    border-radius:5px;
+    transform:rotate(-2deg);
+    border:1.5px dashed;
+  }
+  .badge.overdue{
+    color:var(--red);
+    background:var(--red-soft);
+    border-color:var(--red);
+  }
+  .badge.done{
+    color:var(--green);
+    background:var(--green-soft);
+    border-color:var(--green);
+  }
+
+  .del-btn{
+    flex:0 0 auto;
+    background:none;
+    border:none;
+    color:var(--khaki);
+    font-size:1.2rem;
+    cursor:pointer;
+    padding:2px 4px;
+    line-height:1;
+  }
+  .del-btn:active{ color:var(--red); }
+
+  .empty{
+    text-align:center;
+    padding:40px 10px;
+    color:var(--ink-soft);
+  }
+  .empty .doodle{
+    font-family:'Kalam', cursive;
+    font-size:1.1rem;
+    margin-bottom:4px;
+  }
+
+  ::selection{ background:var(--blue); color:#fff; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>📓 สมุดการบ้าน</h1>
+    <p>บันทึกและติดตามการบ้านทุกวิชา</p>
+  </header>
+
+  <div class="page">
+    <div class="spiral">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <form id="hw-form">
+      <h2>+ เพิ่มการบ้าน</h2>
+      <div class="field">
+        <label for="title">ชื่อการบ้าน / วิชา</label>
+        <input id="title" type="text" placeholder="เช่น การบ้านคณิต บทที่ 5" required maxlength="100">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="assigned">วันที่สั่ง</label>
+          <input id="assigned" type="date" required>
+        </div>
+        <div class="field">
+          <label for="due">วันที่กำหนดส่ง</label>
+          <input id="due" type="date" required>
+        </div>
+      </div>
+      <button type="submit" class="add-btn">เพิ่มลงสมุด</button>
+    </form>
+
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-filter="all">ทั้งหมด</button>
+      <button class="filter-btn" data-filter="pending">ยังไม่เสร็จ</button>
+      <button class="filter-btn" data-filter="done">เสร็จแล้ว</button>
+      <button class="filter-btn" data-filter="overdue">เลยกำหนด</button>
+    </div>
+
+    <ul class="list" id="hw-list"></ul>
+
+    <div class="empty" id="empty-state" style="display:none;">
+      <div class="doodle">🖊️ ยังไม่มีการบ้านในรายการนี้</div>
+      <div>เพิ่มการบ้านชิ้นแรกด้านบนได้เลย</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'homework-items-v1';
+  const form = document.getElementById('hw-form');
+  const titleInput = document.getElementById('title');
+  const assignedInput = document.getElementById('assigned');
+  const dueInput = document.getElementById('due');
+  const list = document.getElementById('hw-list');
+  const emptyState = document.getElementById('empty-state');
+  const filterBtns = document.querySelectorAll('.filter-btn');
+
+  let items = load();
+  let currentFilter = 'all';
+
+  // default assigned date = today
+  assignedInput.value = todayStr();
+
+  function todayStr(){
+    const d = new Date();
+    return d.toISOString().slice(0,10);
+  }
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){
+      return [];
+    }
+  }
+
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }
+
+  function isOverdue(item){
+    if(item.done) return false;
+    const due = new Date(item.due + 'T23:59:59');
+    return due.getTime() < Date.now();
+  }
+
+  function fmtDate(str){
+    if(!str) return '-';
+    const d = new Date(str + 'T00:00:00');
+    const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()+543}`;
+  }
+
+  function render(){
+    let filtered = items.slice();
+    if(currentFilter === 'pending') filtered = filtered.filter(i => !i.done);
+    else if(currentFilter === 'done') filtered = filtered.filter(i => i.done);
+    else if(currentFilter === 'overdue') filtered = filtered.filter(isOverdue);
+
+    // sort: overdue first, then by due date ascending, done items last
+    filtered.sort((a,b) => {
+      if(a.done !== b.done) return a.done ? 1 : -1;
+      return a.due.localeCompare(b.due);
+    });
+
+    list.innerHTML = '';
+    emptyState.style.display = filtered.length ? 'none' : 'block';
+
+    filtered.forEach(item => {
+      const li = document.createElement('li');
+      const overdue = isOverdue(item);
+      li.className = 'item' + (item.done ? ' done' : '') + (overdue ? ' overdue' : '');
+
+      let badge = '';
+      if(item.done) badge = '<span class="badge done">✓ ส่งแล้ว</span>';
+      else if(overdue) badge = '<span class="badge overdue">! เลยกำหนดส่ง</span>';
+
+      li.innerHTML = `
+        <button class="check" aria-label="ทำเครื่องหมายว่าเสร็จ">${item.done ? '✓' : ''}</button>
+        <div class="item-body">
+          <p class="item-title"></p>
+          <div class="item-dates">
+            <span>สั่ง: <b></b></span>
+            <span>ส่ง: <b></b></span>
+          </div>
+          ${badge}
+        </div>
+        <button class="del-btn" aria-label="ลบ">✕</button>
+      `;
+
+      li.querySelector('.item-title').textContent = item.title;
+      const dateBs = li.querySelectorAll('.item-dates b');
+      dateBs[0].textContent = fmtDate(item.assigned);
+      dateBs[1].textContent = fmtDate(item.due);
+
+      li.querySelector('.check').addEventListener('click', () => {
+        item.done = !item.done;
+        save();
+        render();
+      });
+      li.querySelector('.del-btn').addEventListener('click', () => {
+        items = items.filter(i => i.id !== item.id);
+        save();
+        render();
+      });
+
+      list.appendChild(li);
+    });
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = titleInput.value.trim();
+    const assigned = assignedInput.value;
+    const due = dueInput.value;
+    if(!title || !assigned || !due) return;
+
+    items.push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+      title, assigned, due, done: false
+    });
+    save();
+    render();
+
+    titleInput.value = '';
+    dueInput.value = '';
+    assignedInput.value = todayStr();
+    titleInput.focus();
+  });
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      render();
+    });
+  });
+
+  render();
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+    });
+  }
+})();
+</script>
+</body>
+</html>

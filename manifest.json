@@ -1,0 +1,25 @@
+{
+  "name": "สมุดการบ้าน - Homework Tracker",
+  "short_name": "สมุดการบ้าน",
+  "description": "แอปติดตามการบ้าน บันทึกชื่อการบ้าน สถานะ วันที่สั่ง และวันที่กำหนดส่ง",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#3B5BA5",
+  "theme_color": "#3B5BA5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
