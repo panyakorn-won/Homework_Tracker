@@ -1,565 +1,323 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>MCR Demo</title>
-<meta name="description" content="Intelligent academic task and assignment tracker.">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- แก้ชื่อตอนแชร์ / หัวแท็บเบราว์เซอร์ -->
+    <title>MCR Demo</title>
+    <meta property="og:title" content="MCR Demo">
+    <meta property="og:description" content="Homework Tracker - Intelligent Academic Tracker & Planner">
+    
+    <!-- ตั้งค่า ไอคอนสำหรับ iPhone / iOS Safari -->
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+    
+    <!-- ตั้งค่า ไอคอนสำหรับ เบราว์เซอร์ทั่วไป -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="shortcut icon" href="icon-192.png">
+    
+    <!-- เชื่อมต่อ Manifest สำหรับ PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#030712">
 
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/svg+xml" href="icon.svg">
-<meta name="theme-color" content="#0f172a">
-<link rel="apple-touch-icon" href="icon.svg">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CogniTask">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+        body {
+            background-color: #030712;
+            color: #f3f4f6;
+            min-height: 100vh;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-<style>
-  :root {
-    --bg-main: #0b0f19;
-    --surface: #151d30;
-    --surface-card: #ffffff;
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --border: #e2e8f0;
-    --primary: #3b82f6;
-    --success: #10b981;
-    --success-bg: #ecfdf5;
-    --danger: #ef4444;
-    --danger-bg: #fef2f2;
-    --radius: 16px;
-    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-  }
+        .container {
+            width: 100%;
+            max-width: 480px;
+        }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --surface-card: #151d30;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #26334d;
-      --success-bg: rgba(16, 185, 129, 0.12);
-      --danger-bg: rgba(239, 68, 68, 0.12);
-    }
-  }
+        /* Header & Logo */
+        .header {
+            margin-bottom: 24px;
+        }
 
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
 
-  body {
-    margin: 0;
-    background: var(--bg-main);
-    min-height: 100vh;
-    font-family: 'Inter', -apple-system, sans-serif;
-    color: var(--text-main);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+        .app-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            object-fit: cover;
+            background-color: #1e293b;
+        }
 
-  .app-container {
-    max-width: 560px;
-    margin: 0 auto;
-    padding: 0 0 40px;
-  }
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
 
-  header {
-    padding: calc(env(safe-area-inset-top) + 24px) 24px 20px;
-    color: #f8fafc;
-  }
+        .subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            font-weight: 400;
+        }
 
-  .header-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 6px;
-  }
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
+        }
 
-  .header-brand img {
-    width: 36px;
-    height: 36px;
-  }
+        .stat-card {
+            background-color: #0b1329;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 14px 8px;
+            text-align: center;
+        }
 
-  header h1 {
-    font-size: 1.6rem;
-    font-weight: 800;
-    margin: 0;
-    letter-spacing: -0.025em;
-  }
+        .stat-number {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
 
-  header p {
-    margin: 0;
-    font-size: 0.88rem;
-    color: #94a3b8;
-  }
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-  /* Stats Grid */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 20px;
-  }
+        /* Form Card */
+        .card {
+            background-color: #0b1329;
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
 
-  .stat-card {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 12px;
-    text-align: center;
-  }
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-  .stat-card .num {
-    font-size: 1.35rem;
-    font-weight: 800;
-    color: #ffffff;
-    font-family: 'JetBrains Mono', monospace;
-  }
+        .form-group {
+            margin-bottom: 14px;
+        }
 
-  .stat-card .label {
-    font-size: 0.7rem;
-    color: #94a3b8;
-    text-transform: uppercase;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    margin-top: 2px;
-  }
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
 
-  /* Main Workspace */
-  .workspace {
-    background: var(--surface-card);
-    border-radius: 24px 24px 0 0;
-    padding: 24px 20px 20px;
-    min-height: 65vh;
-    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.3);
-  }
+        input[type="text"], input[type="date"] {
+            width: 100%;
+            padding: 12px 14px;
+            background-color: #030712;
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            color: #f3f4f6;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
 
-  form {
-    background: var(--surface-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow);
-  }
+        input:focus {
+            border-color: #3b82f6;
+        }
 
-  form h2 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin: 0 0 14px;
-    color: var(--primary);
-  }
+        .date-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
 
-  .field { margin-bottom: 12px; }
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background-color: #3b82f6;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: background-color 0.2s;
+        }
 
-  .field label {
-    display: block;
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-  }
+        .btn-primary:active {
+            background-color: #2563eb;
+        }
 
-  .field input {
-    width: 100%;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 11px 14px;
-    font-size: 0.95rem;
-    font-family: inherit;
-    background: transparent;
-    color: var(--text-main);
-  }
+        /* Search & Filters */
+        .search-box {
+            position: relative;
+            margin-bottom: 14px;
+        }
 
-  .field input:focus {
-    outline: none;
-    border-color: var(--primary);
-  }
+        .search-box input {
+            padding-left: 38px;
+        }
 
-  .row2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
 
-  .add-btn {
-    width: 100%;
-    border: none;
-    background: var(--primary);
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 0.95rem;
-    padding: 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.05s ease;
-  }
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            padding-bottom: 4px;
+        }
 
-  .add-btn:active { transform: scale(0.99); }
+        .tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: #0b1329;
+            border: 1px solid #1e293b;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+        }
 
-  /* Controls */
-  .controls {
-    margin-bottom: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
+        .tab.active {
+            background-color: #3b82f6;
+            color: #ffffff;
+            border-color: #3b82f6;
+        }
 
-  .search-box input {
-    width: 100%;
-    border: 1.5px solid var(--border);
-    border-radius: 999px;
-    padding: 9px 16px;
-    font-size: 0.88rem;
-    background: transparent;
-    color: var(--text-main);
-  }
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
 
-  .filters {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-
-  .filter-btn {
-    border: 1.5px solid var(--border);
-    background: transparent;
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 0.8rem;
-    padding: 6px 14px;
-    border-radius: 999px;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-
-  .filter-btn.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: #ffffff;
-  }
-
-  /* List Items */
-  .list { list-style: none; margin: 0; padding: 0; }
-
-  .item {
-    background: var(--surface-card);
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--text-muted);
-    border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 12px;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    box-shadow: var(--shadow);
-  }
-
-  .item.done { border-left-color: var(--success); opacity: 0.65; }
-  .item.overdue { border-left-color: var(--danger); }
-
-  .check {
-    flex: 0 0 auto;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 2px solid var(--text-muted);
-    background: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 2px;
-  }
-
-  .item.done .check {
-    background: var(--success);
-    border-color: var(--success);
-    color: #fff;
-    font-size: 0.8rem;
-  }
-
-  .item-body { flex: 1; min-width: 0; }
-
-  .item-title {
-    font-weight: 700;
-    font-size: 0.98rem;
-    margin: 0 0 6px;
-    word-break: break-word;
-  }
-
-  .item.done .item-title {
-    text-decoration: line-through;
-    color: var(--text-muted);
-  }
-
-  .item-dates {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
-  .item-dates b { color: var(--text-main); font-weight: 600; }
-
-  .badge {
-    display: inline-block;
-    margin-top: 8px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-
-  .badge.overdue { color: var(--danger); background: var(--danger-bg); }
-  .badge.done { color: var(--success); background: var(--success-bg); }
-
-  .del-btn {
-    flex: 0 0 auto;
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 2px 4px;
-  }
-
-  .del-btn:hover { color: var(--danger); }
-
-  .empty {
-    text-align: center;
-    padding: 40px 10px;
-    color: var(--text-muted);
-  }
-</style>
+        .empty-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            opacity: 0.6;
+        }
+    </style>
 </head>
 <body>
 
-<div class="app-container">
-  <header>
-    <div class="header-brand">
-      <img src="icon.svg" alt="CogniTask Logo">
-      <h1>Homework Tracker</h1>
-    </div>
-    <p>Intelligent Academic Tracker & Planner</p>
-    
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="num" id="stat-total">0</div>
-        <div class="label">Total Tasks</div>
-      </div>
-      <div class="stat-card">
-        <div class="num" id="stat-pending">0</div>
-        <div class="label">Pending</div>
-      </div>
-      <div class="stat-card">
-        <div class="num" id="stat-done">0</div>
-        <div class="label">Completed</div>
-      </div>
-    </div>
-  </header>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="brand-title">
+                <!-- โหลดไอคอนจากไฟล์ icon-192.png -->
+                <img src="icon-192.png" alt="Logo" class="app-logo" onerror="this.style.display='none'">
+                <h1>Homework Tracker</h1>
+            </div>
+            <p class="subtitle">Intelligent Academic Tracker & Planner</p>
+        </header>
 
-  <div class="workspace">
-    <form id="hw-form">
-      <h2>+ Create New Task</h2>
-      <div class="field">
-        <label for="title">Task Title / Subject</label>
-        <input id="title" type="text" placeholder="e.g. Physics Ch. 5 Problems" required maxlength="100">
-      </div>
-      <div class="row2">
-        <div class="field">
-          <label for="assigned">Assigned Date</label>
-          <input id="assigned" type="date" required>
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="total-count">0</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pending-count">0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completed-count">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
         </div>
-        <div class="field">
-          <label for="due">Due Date</label>
-          <input id="due" type="date" required>
-        </div>
-      </div>
-      <button type="submit" class="add-btn">Save Task</button>
-    </form>
 
-    <div class="controls">
-      <div class="search-box">
-        <input type="text" id="search-input" placeholder="🔍 Search tasks...">
-      </div>
-      <div class="filters" id="filters">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="pending">Pending</button>
-        <button class="filter-btn" data-filter="done">Completed</button>
-        <button class="filter-btn" data-filter="overdue">Overdue</button>
-      </div>
+        <!-- Form -->
+        <div class="card">
+            <div class="card-title">+ Create New Task</div>
+            <form id="task-form">
+                <div class="form-group">
+                    <label>Task Title / Subject</label>
+                    <input type="text" placeholder="e.g. Physics Ch. 5 Problems" required>
+                </div>
+                <div class="date-row">
+                    <div class="form-group">
+                        <label>Assigned Date</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label>Due Date</label>
+                        <input type="date">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Save Task</button>
+            </form>
+        </div>
+
+        <!-- Search & Filters -->
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search tasks...">
+        </div>
+
+        <div class="filter-tabs">
+            <button class="tab active">All</button>
+            <button class="tab">Pending</button>
+            <button class="tab">Completed</button>
+            <button class="tab">Overdue</button>
+        </div>
+
+        <!-- Empty List -->
+        <div class="empty-state">
+            <div class="empty-icon">⚙️</div>
+            <p>No tasks found. Add a new task above!</p>
+        </div>
     </div>
 
-    <ul class="list" id="hw-list"></ul>
-
-    <div class="empty" id="empty-state" style="display:none;">
-      <div style="font-size: 1.5rem; margin-bottom: 6px;">⚙️</div>
-      <div>No tasks found. Add a new task above!</div>
-    </div>
-  </div>
-</div>
-
-<script>
-(function(){
-  const STORAGE_KEY = 'cognitask-items-v1';
-  const form = document.getElementById('hw-form');
-  const titleInput = document.getElementById('title');
-  const assignedInput = document.getElementById('assigned');
-  const dueInput = document.getElementById('due');
-  const searchInput = document.getElementById('search-input');
-  const list = document.getElementById('hw-list');
-  const emptyState = document.getElementById('empty-state');
-  const filterBtns = document.querySelectorAll('.filter-btn');
-
-  let items = load();
-  let currentFilter = 'all';
-
-  assignedInput.value = todayStr();
-
-  function todayStr(){ return new Date().toISOString().slice(0,10); }
-
-  function load(){
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch(e) { return []; }
-  }
-
-  function save(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    updateStats();
-  }
-
-  function isOverdue(item){
-    if(item.done) return false;
-    const due = new Date(item.due + 'T23:59:59');
-    return due.getTime() < Date.now();
-  }
-
-  function fmtDate(str){
-    if(!str) return '-';
-    const d = new Date(str + 'T00:00:00');
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  }
-
-  function updateStats(){
-    document.getElementById('stat-total').textContent = items.length;
-    document.getElementById('stat-pending').textContent = items.filter(i => !i.done).length;
-    document.getElementById('stat-done').textContent = items.filter(i => i.done).length;
-  }
-
-  function render(){
-    const query = searchInput.value.toLowerCase().trim();
-    let filtered = items.filter(i => i.title.toLowerCase().includes(query));
-
-    if(currentFilter === 'pending') filtered = filtered.filter(i => !i.done);
-    else if(currentFilter === 'done') filtered = filtered.filter(i => i.done);
-    else if(currentFilter === 'overdue') filtered = filtered.filter(isOverdue);
-
-    filtered.sort((a,b) => {
-      if(a.done !== b.done) return a.done ? 1 : -1;
-      return a.due.localeCompare(b.due);
-    });
-
-    list.innerHTML = '';
-    emptyState.style.display = filtered.length ? 'none' : 'block';
-
-    filtered.forEach(item => {
-      const li = document.createElement('li');
-      const overdue = isOverdue(item);
-      li.className = 'item' + (item.done ? ' done' : '') + (overdue ? ' overdue' : '');
-
-      let badge = '';
-      if(item.done) badge = '<span class="badge done">✓ Completed</span>';
-      else if(overdue) badge = '<span class="badge overdue">! Overdue</span>';
-
-      li.innerHTML = `
-        <button class="check" aria-label="Toggle Complete">${item.done ? '✓' : ''}</button>
-        <div class="item-body">
-          <p class="item-title"></p>
-          <div class="item-dates">
-            <span>Assigned: <b></b></span>
-            <span>Due: <b></b></span>
-          </div>
-          ${badge}
-        </div>
-        <button class="del-btn" aria-label="Delete">✕</button>
-      `;
-
-      li.querySelector('.item-title').textContent = item.title;
-      const dateBs = li.querySelectorAll('.item-dates b');
-      dateBs[0].textContent = fmtDate(item.assigned);
-      dateBs[1].textContent = fmtDate(item.due);
-
-      li.querySelector('.check').addEventListener('click', () => {
-        item.done = !item.done;
-        save();
-        render();
-      });
-
-      li.querySelector('.del-btn').addEventListener('click', () => {
-        items = items.filter(i => i.id !== item.id);
-        save();
-        render();
-      });
-
-      list.appendChild(li);
-    });
-  }
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const title = titleInput.value.trim();
-    const assigned = assignedInput.value;
-    const due = dueInput.value;
-    if(!title || !assigned || !due) return;
-
-    items.push({
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
-      title, assigned, due, done: false
-    });
-
-    save();
-    render();
-
-    titleInput.value = '';
-    dueInput.value = '';
-    assignedInput.value = todayStr();
-    titleInput.focus();
-  });
-
-  searchInput.addEventListener('input', render);
-
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentFilter = btn.dataset.filter;
-      render();
-    });
-  });
-
-  updateStats();
-  render();
-
-  if('serviceWorker' in navigator){
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js').catch(()=>{});
-    });
-  }
-})();
-</script>
-</body>
-</html>
-</script>
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .catch(err => console.log('SW registration failed: ', err));
+            });
+        }
+    </script>
 </body>
 </html>
