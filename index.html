@@ -245,9 +245,9 @@
         }
 
         .task-item.completed {
-            opacity: 0.6;
-            border-color: #10b98133;
-            background-color: #064e3b11;
+            opacity: 0.75;
+            border-color: #10b98144;
+            background-color: #064e3b15;
         }
 
         .task-item.overdue {
@@ -258,17 +258,46 @@
             flex: 1;
         }
 
+        .task-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+
         .task-title {
             font-size: 16px;
             font-weight: 600;
             color: #f3f4f6;
-            margin-bottom: 6px;
             word-break: break-word;
         }
 
         .task-item.completed .task-title {
             text-decoration: line-through;
             color: #9ca3af;
+        }
+
+        /* Badges */
+        .status-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-pending {
+            background-color: #0284c722;
+            color: #38bdf8;
+            border: 1px solid #0284c744;
+        }
+
+        .badge-completed {
+            background-color: #10b98122;
+            color: #34d399;
+            border: 1px solid #10b98144;
         }
 
         .task-dates {
@@ -288,7 +317,7 @@
             background: none;
             border: 1px solid #1e293b;
             color: #94a3b8;
-            padding: 8px;
+            padding: 8px 10px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
@@ -303,7 +332,7 @@
             color: #10b981;
         }
 
-        .btn-check:hover {
+        .btn-check:hover, .btn-check.active-check {
             background-color: #10b98122;
         }
 
@@ -418,15 +447,15 @@
         const taskList = document.getElementById('task-list');
         const emptyState = document.getElementById('empty-state');
 
-        // ฟังก์ชัน บันทึก และ อัปเดตหน้าจอ
+        // ฟังก์ชัน บันทึก และ แสดงผล
         function saveAndRender() {
             localStorage.setItem('mcr_tasks', JSON.stringify(tasks));
             renderTasks();
         }
 
-        // ฟังก์ชัน แสดงผลการบ้าน
+        // ฟังก์ชัน วาดตารางการบ้าน
         function renderTasks() {
-            // 1. คำนวณและอัปเดตตัวเลข Stats จากข้อมูลจริงทั้งหมด
+            // 1. คำนวณและอัปเดตตัวเลข Stats
             const total = tasks.length;
             const completedCount = tasks.filter(t => t.completed).length;
             const pendingCount = total - completedCount;
@@ -435,26 +464,25 @@
             document.getElementById('pending-count').textContent = pendingCount;
             document.getElementById('completed-count').textContent = completedCount;
 
-            // วันที่ปัจจุบัน (รูปแบบ YYYY-MM-DD) สำหรับเช็ก Overdue
             const todayStr = new Date().toISOString().split('T')[0];
 
-            // 2. กรองข้อมูลตาม Filter (All / Pending / Completed / Overdue)
+            // 2. กรองข้อมูลตาม Filter
             let filteredTasks = tasks.filter(task => {
                 if (currentFilter === 'pending') return !task.completed;
                 if (currentFilter === 'completed') return task.completed;
                 if (currentFilter === 'overdue') {
                     return !task.completed && task.dueDate && task.dueDate < todayStr;
                 }
-                return true; // 'all'
+                return true;
             });
 
-            // 3. กรองข้อมูลตามช่องค้นหา Search
+            // 3. กรองตาม Search Query
             if (searchQuery.trim() !== '') {
                 const q = searchQuery.toLowerCase().trim();
                 filteredTasks = filteredTasks.filter(task => task.title.toLowerCase().includes(q));
             }
 
-            // 4. แสดงผลลงในหน้าเว็บ
+            // 4. แสดงผลรายการการบ้าน
             taskList.innerHTML = '';
 
             if (filteredTasks.length === 0) {
@@ -473,14 +501,19 @@
 
                     taskCard.innerHTML = `
                         <div class="task-info">
-                            <div class="task-title">${escapeHtml(task.title)}</div>
+                            <div class="task-title-row">
+                                <div class="task-title">${escapeHtml(task.title)}</div>
+                                <span class="status-badge ${task.completed ? 'badge-completed' : 'badge-pending'}">
+                                    ${task.completed ? '✅ Completed' : '⏳ Pending'}
+                                </span>
+                            </div>
                             <div class="task-dates">
                                 ${assignedText ? `<span>📅 ${assignedText}</span>` : ''}
-                                ${dueText ? `<span style="color: ${isOverdue ? '#ef4444' : '#38bdf8'}; font-weight: ${isOverdue ? 'bold' : 'normal'};">⏰ ${dueText} ${isOverdue ? '(เลยกำหนด)' : ''}</span>` : ''}
+                                ${dueText ? `<span style="color: ${isOverdue ? '#ef4444' : '#38bdf8'}; font-weight: ${isOverdue ? 'bold' : 'normal'};">⏰ ${dueText} ${isOverdue ? '(เลยกำหนดส่ง)' : ''}</span>` : ''}
                             </div>
                         </div>
                         <div class="task-actions">
-                            <button class="btn-action btn-check" onclick="toggleTask(${task.id})" title="${task.completed ? 'ย้ายกลับไปค้างส่ง' : 'ทำเสร็จแล้ว'}">
+                            <button class="btn-action btn-check ${task.completed ? 'active-check' : ''}" onclick="toggleTask(${task.id})" title="${task.completed ? 'ย้ายกลับไป Pending' : 'เปลี่ยนเป็น Completed'}">
                                 ${task.completed ? '↩️' : '✓'}
                             </button>
                             <button class="btn-action btn-delete" onclick="deleteTask(${task.id})" title="ลบรายการ">
@@ -506,22 +539,21 @@
                 completed: false
             };
 
-            tasks.unshift(newTask); // รายการใหม่อยู่บนสุด
+            tasks.unshift(newTask);
             saveAndRender();
 
-            // เคลียร์ค่าในช่องป้อน
             taskInput.value = '';
             assignedDateInput.value = '';
             dueDateInput.value = '';
         });
 
-        // ค้นหาการบ้านเมื่อพิมพ์ในช่อง Search
+        // Search Input
         searchInput.addEventListener('input', (e) => {
             searchQuery = e.target.value;
             renderTasks();
         });
 
-        // เปลี่ยนแท็บตัวกรอง (All / Pending / Completed / Overdue)
+        // Filter Tabs
         filterTabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 filterTabs.forEach(t => t.classList.remove('active'));
@@ -531,7 +563,7 @@
             });
         });
 
-        // สลับสถานะ ทำเสร็จแล้ว / ค้างอยู่
+        // สลับสถานะ (Pending <-> Completed)
         window.toggleTask = function(id) {
             const task = tasks.find(t => t.id === id);
             if (task) {
@@ -540,7 +572,7 @@
             }
         };
 
-        // ลบการบ้าน
+        // ลบรายการ
         window.deleteTask = function(id) {
             if (confirm('คุณต้องการลบรายการการบ้านนี้ใช่หรือไม่?')) {
                 tasks = tasks.filter(t => t.id !== id);
@@ -548,7 +580,6 @@
             }
         };
 
-        // ฟังก์ชันป้องกันข้อความตัวอักษรพิเศษ
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
