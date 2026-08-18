@@ -137,8 +137,8 @@
     </div>
 
     <script>
-        // ⚠️ วาง Web App URL ที่ได้จากขั้นตอนที่ 3 ตรงนี้
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxYQXocEv4NOvd8wIzghSctVxklFz4AJ22RicWaFfyed4dn15_mMEF19IJHEO09780b/exec";
+        // ⚠️ นำ Web app URL มาแปะแทนที่บรรทัดด้านล่างนี้ (ให้อยู่ในเครื่องหมายอัญประกาศ "")
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdChR_8SO-CsyxwmbYpmSeKeGfRNWHvDcfVmjm_9VZWpLwfIuXW1CPOfexcWeEpfQ/exec";
 
         let tasks = JSON.parse(localStorage.getItem('mcr_tasks')) || [];
         let currentFilter = 'all';
@@ -185,7 +185,7 @@
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({ action: "syncAll", tasks: tasks })
                 });
                 updateCloudStatus('online');
