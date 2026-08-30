@@ -442,6 +442,10 @@
   }
 
   // ---------- 3D Holographic Calendar ----------
+  let holoAngleX = -10; // มุมเอียงแนวตั้ง (Pitch)
+  let holoAngleY = 0;   // มุมหมุนแนวนอน (Yaw)
+  let holoLastY = 0;
+
   function renderHologram() {
     if (!holoRing) return;
     const upcoming = tasks.filter((t) => t.dueDate).slice();
@@ -455,28 +459,60 @@
     }
     holoEmpty.classList.add('hidden');
 
+    // 1. สร้างแกนกลางโฮโลแกรม (Central Core)
+    const core = document.createElement('div');
+    core.className = 'holo-core';
+    holoRing.appendChild(core);
+
     const count = upcoming.length;
-    const radius = Math.max(140, Math.min(220, count * 26));
+    const radius = Math.max(140, Math.min(230, count * 28));
     const nowIso = new Date().toISOString().slice(0, 16);
 
     upcoming.forEach((task, i) => {
       const angle = (360 / count) * i;
       const isOverdue = !task.completed && task.dueDate < nowIso;
+
+      // 2. Node โหนดระบุตำแหน่งในอวกาศ 3 มิติ
+      const node = document.createElement('div');
+      node.className = 'holo-card-node';
+      node.setAttribute('data-angle', angle);
+      node.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+
+      // 3. เส้นลำแสงเชื่อมจากแกนกลางไปยังการ์ด
+      const line = document.createElement('div');
+      line.className = 'holo-line';
+      line.style.height = `${radius}px`;
+
+      // 4. ตัวการ์ดงาน (ที่จะถูกหันหน้าสู้กล้องตลอดเวลา)
       const card = document.createElement('div');
       card.className = `holo-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
-      card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
       card.innerHTML = `
         <div class="holo-title">${escapeHtml(task.title)}</div>
         <div class="holo-date">⏰ ${formatDateTimeDisplay(task.dueDate)}</div>
       `;
-      holoRing.appendChild(card);
+
+      node.appendChild(line);
+      node.appendChild(card);
+      holoRing.appendChild(node);
     });
 
     applyHoloRotation();
   }
 
   function applyHoloRotation() {
-    holoRing.style.transform = `rotateY(${holoAngle}deg)`;
+    if (!holoRing) return;
+    // หมุนเวที 3D ตามมุม X และ Y
+    holoRing.style.transform = `rotateX(${holoAngleX}deg) rotateY(${holoAngleY}deg)`;
+
+    // เทคนิค Billboard: หันการ์ดกลับมาหาผู้ใช้เสมอ ทำให้ตัวอักษรไม่กลับหัว/ไม่อ่านถอยหลัง
+    const nodes = holoRing.querySelectorAll('.holo-card-node');
+    nodes.forEach((node) => {
+      const angle = parseFloat(node.getAttribute('data-angle') || 0);
+      const innerCard = node.querySelector('.holo-card');
+      if (innerCard) {
+        innerCard.style.transform = `rotateY(${-angle - holoAngleY}deg) rotateX(${-holoAngleX}deg)`;
+      }
+    });
   }
 
   function stopAutoRotate() {
@@ -493,7 +529,7 @@
     holoAutoBtn.setAttribute('aria-pressed', 'true');
     holoAutoBtn.classList.add('active');
     const step = () => {
-      holoAngle = (holoAngle + 0.25) % 360;
+      holoAngleY = (holoAngleY + 0.3) % 360;
       applyHoloRotation();
       holoAutoRotate = requestAnimationFrame(step);
     };
@@ -501,36 +537,46 @@
   }
 
   if (holoStage) {
-    const onPointerDown = (clientX) => {
+    const onPointerDown = (clientX, clientY) => {
       stopAutoRotate();
       holoDragging = true;
       holoLastX = clientX;
+      holoLastY = clientY;
       holoStage.style.cursor = 'grabbing';
     };
-    const onPointerMove = (clientX) => {
+
+    const onPointerMove = (clientX, clientY) => {
       if (!holoDragging) return;
-      const delta = clientX - holoLastX;
-      holoAngle -= delta * 0.4;
+      const deltaX = clientX - holoLastX;
+      const deltaY = clientY - holoLastY;
+
+      // หมุนแนวนอน
+      holoAngleY += deltaX * 0.4;
+      // หมุนแนวตั้ง (จำกัดมุมระหว่าง -75 ถึง 75 องศาเพื่อ UX ที่ดี)
+      holoAngleX = Math.max(-75, Math.min(75, holoAngleX - deltaY * 0.4));
+
       holoLastX = clientX;
+      holoLastY = clientY;
       applyHoloRotation();
     };
+
     const onPointerUp = () => {
       holoDragging = false;
       holoStage.style.cursor = 'grab';
     };
 
-    holoStage.addEventListener('pointerdown', (e) => onPointerDown(e.clientX));
-    window.addEventListener('pointermove', (e) => onPointerMove(e.clientX));
+    holoStage.addEventListener('pointerdown', (e) => onPointerDown(e.clientX, e.clientY));
+    window.addEventListener('pointermove', (e) => onPointerMove(e.clientX, e.clientY));
     window.addEventListener('pointerup', onPointerUp);
 
     holoRotateLeft.addEventListener('click', () => {
       stopAutoRotate();
-      holoAngle -= 30;
+      holoAngleY -= 30;
       applyHoloRotation();
     });
     holoRotateRight.addEventListener('click', () => {
       stopAutoRotate();
-      holoAngle += 30;
+      holoAngleY += 30;
       applyHoloRotation();
     });
     holoAutoBtn.addEventListener('click', () => {
@@ -538,7 +584,6 @@
       else startAutoRotate();
     });
   }
-
   // ---------- Auth / Cloud Sync UI ----------
   function updateSyncBtnState() {
     if (!window.SyncModule.isConfigured()) {
