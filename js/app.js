@@ -611,3 +611,143 @@
 
   init();
 })();
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. อ้างอิง Element ในหน้า HTML
+    const stage = document.getElementById('holo-stage');
+    const ring = document.getElementById('holo-ring');
+    
+    // ปุ่มควบคุม (รองรับทั้ง ID และ Class)
+    const btnRotate = document.getElementById('btn-rotate') || document.querySelector('.holo-btn-rotate');
+    const btnZoomIn = document.getElementById('btn-zoom-in') || document.querySelector('.holo-btn-zoomin');
+    const btnZoomOut = document.getElementById('btn-zoom-out') || document.querySelector('.holo-btn-zoomout');
+
+    if (!stage || !ring) return;
+
+    // 2. ตัวแปรสำหรับคำนวณ 3D Stage
+    let rotX = -10;
+    let rotY = 0;
+    let zoomScale = 1;
+    let isAutoRotating = false;
+    let autoRotateId = null;
+
+    // ตัวแปรสำหรับ Drag (คลิกลากหมุน)
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let startRotX = 0, startRotY = 0;
+
+    // 3. ฟังก์ชันอัปเดตการแสดงผล 3D (เวทีหมุน + การ์ดหันหน้าตรง)
+    function updateStage() {
+        // หมุนและซูมตัววงแหวน 3D
+        ring.style.transform = `scale(${zoomScale}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        
+        // Billboard Effect: หันหน้าการ์ดกลับมาหาจอเสมอ เพื่อให้ข้อความอ่านง่าย
+        const cards = document.querySelectorAll('.holo-card');
+        cards.forEach(card => {
+            card.style.transform = `rotateY(${-rotY}deg) rotateX(${-rotX}deg)`;
+        });
+    }
+
+    // 4. ระบบหมุนอัตโนมัติ (Auto Rotate)
+    function toggleAutoRotate() {
+        isAutoRotating = !isAutoRotating;
+
+        if (btnRotate) {
+            btnRotate.classList.toggle('active', isAutoRotating);
+        }
+
+        if (isAutoRotating) {
+            const animate = () => {
+                if (!isAutoRotating) return;
+                rotY = (rotY + 0.4) % 360; // ปรับความเร็วการหมุนได้ตรงนี้
+                updateStage();
+                autoRotateId = requestAnimationFrame(animate);
+            };
+            animate();
+        } else {
+            if (autoRotateId) cancelAnimationFrame(autoRotateId);
+        }
+    }
+
+    // 5. ระบบซูมด้วยลูกกลิ้งเมาส์ (Mouse Wheel Zoom)
+    stage.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.08 : 0.08;
+        zoomScale = Math.min(Math.max(0.4, zoomScale + delta), 2.5); // จำกัดช่วงซูม 0.4x - 2.5x
+        updateStage();
+    }, { passive: false });
+
+    // 6. ระบบคลิกลากหมุน (Mouse Dragging)
+    stage.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startRotX = rotX;
+        startRotY = rotY;
+
+        // ถ้าเปิดหมุนอัตโนมัติอยู่ ให้หยุดเมื่อผู้ใช้เริ่มลาก
+        if (isAutoRotating) toggleAutoRotate();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        rotY = startRotY + deltaX * 0.4;
+        rotX = Math.max(-60, Math.min(60, startRotX - deltaY * 0.4)); // ล็อคมุมก้ม/เงยไว้ไม่ให้พลิกกลับหัว
+        updateStage();
+    });
+
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    // 7. ระบบสัมผัสบนมือถือ (Touch Support)
+    stage.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            isDragging = true;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            startRotX = rotX;
+            startRotY = rotY;
+            if (isAutoRotating) toggleAutoRotate();
+        }
+    }, { passive: true });
+
+    stage.addEventListener('touchmove', (e) => {
+        if (!isDragging || e.touches.length !== 1) return;
+        const deltaX = e.touches[0].clientX - startX;
+        const deltaY = e.touches[0].clientY - startY;
+
+        rotY = startRotY + deltaX * 0.4;
+        rotX = Math.max(-60, Math.min(60, startRotX - deltaY * 0.4));
+        updateStage();
+    }, { passive: true });
+
+    stage.addEventListener('touchend', () => {
+        isDragging = false;
+    });
+
+    // 8. ผูก Event เข้ากับปุ่มกดควบคุม
+    if (btnRotate) {
+        btnRotate.addEventListener('click', toggleAutoRotate);
+    }
+
+    if (btnZoomIn) {
+        btnZoomIn.addEventListener('click', () => {
+            zoomScale = Math.min(zoomScale + 0.2, 2.5);
+            updateStage();
+        });
+    }
+
+    if (btnZoomOut) {
+        btnZoomOut.addEventListener('click', () => {
+            zoomScale = Math.max(zoomScale - 0.2, 0.4);
+            updateStage();
+        });
+    }
+
+    // เรียกทำงานครั้งแรกเพื่อจัดตำแหน่งเริ่มต้น
+    updateStage();
+});
