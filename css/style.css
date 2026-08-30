@@ -20,7 +20,7 @@ body {
     max-width: 480px;
 }
 
-/* Visible focus ring for keyboard/screen-reader users (accessibility) */
+/* Visible focus ring for accessibility */
 a:focus-visible, button:focus-visible, input:focus-visible,
 textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
     outline: 2px solid #38bdf8;
@@ -483,7 +483,7 @@ input:focus, textarea:focus, select:focus {
     opacity: 0.6;
 }
 
-/* ---------- Modal (Edit Task / Auth) ---------- */
+/* ---------- Modal ---------- */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -560,157 +560,80 @@ input:focus, textarea:focus, select:focus {
     text-align: right;
 }
 
-/* ---------- 3D Holographic Calendar View ---------- */
-.hologram-stage {
-    position: relative;
-    height: 420px;
-    margin-bottom: 16px;
-    border-radius: 20px;
-    background: radial-gradient(ellipse at center, #06122a 0%, #030712 75%);
-    border: 1px solid #1e293b;
-    overflow: hidden;
-    perspective: 1000px;
-    touch-action: none;
-    cursor: grab;
-}
-
-.hologram-stage:active {
-    cursor: grabbing;
-}
-
-.hologram-stage::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-        linear-gradient(rgba(56, 189, 248, 0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(56, 189, 248, 0.06) 1px, transparent 1px);
-    background-size: 24px 24px;
-    pointer-events: none;
-}
-
+/* ==========================================
+   3D Holographic Stage (Dark Blueprint Grid)
+   ========================================== */
 #holo-stage {
-  perspective: 1000px !important;
-  position: relative;
-  min-height: 480px;
-  height: 520px;
-  overflow: hidden;
-  cursor: grab;
-  user-select: none;
-  touch-action: none;
-  border-radius: 20px;
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 8px 32px rgba(0, 0, 0, 0.4);
+    perspective: 1000px !important;
+    position: relative;
+    min-height: 480px;
+    height: 520px;
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    border-radius: 20px;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 8px 32px rgba(0, 0, 0, 0.4);
 
-  /* 1. สีพื้นหลังหลักแบบเข้ม */
-  background-color: #060b17 !important;
+    /* 1. สีพื้นหลังหลักกระดาษกราฟดาร์กโหมด */
+    background-color: #060b17 !important;
 
-  /* 2. สร้างเส้นตารางกะรดาษกราฟ + แสงเรืองตรงกลาง */
-  background-image: 
-    radial-gradient(circle at 50% 50%, rgba(38, 99, 235, 0.25) 0%, rgba(6, 11, 23, 0.95) 75%),
-    linear-gradient(rgba(56, 189, 248, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56, 189, 248, 0.12) 1px, transparent 1px);
-  
-  /* 3. กำหนดขนาดตารางกราฟ (30px x 30px) */
-  background-size: 100% 100%, 30px 30px, 30px 30px;
-  background-position: center center, center center, center center;
+    /* 2. สร้างเส้นตารางกระดาษกราฟ + แสงเรืองตรงกลาง */
+    background-image: 
+        radial-gradient(circle at 50% 50%, rgba(38, 99, 235, 0.25) 0%, rgba(6, 11, 23, 0.95) 75%),
+        linear-gradient(rgba(56, 189, 248, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.12) 1px, transparent 1px);
+    background-size: 100% 100%, 30px 30px, 30px 30px;
+    background-position: center center, center center, center center;
 }
 
 #holo-stage:active {
-  cursor: grabbing;
+    cursor: grabbing;
 }
 
-@keyframes scan {
-    0% { background-position-y: 0%; }
-    100% { background-position-y: 220%; }
-}
-
-.hologram-ring-wrapper {
+#holo-ring {
     position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
+    height: 100%;
     transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
 }
 
-.hologram-ring {
-    position: relative;
-    width: 0;
-    height: 0;
-    transform-style: preserve-3d;
-}
-
-/* แกนกลางโฮโลแกรม */
-.holo-core {
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    top: -12px;
-    left: -12px;
-    border-radius: 50%;
-    background: radial-gradient(circle, #38bdf8 0%, rgba(56, 189, 248, 0.3) 60%, transparent 100%);
-    box-shadow: 0 0 20px #38bdf8, 0 0 40px #0284c7;
-    animation: corePulse 2s ease-in-out infinite alternate;
-    pointer-events: none;
-}
-
-@keyframes corePulse {
-    0% { transform: scale(0.85); opacity: 0.7; }
-    100% { transform: scale(1.15); opacity: 1; }
-}
-
-/* Node ระบุตำแหน่งและเส้นเชื่อม */
+/* Node วางตำแหน่ง 3D */
 .holo-card-node {
     position: absolute;
-    top: 0;
-    left: 0;
-    transform-style: preserve-3d;
+    top: 50%;
+    left: 50%;
+    margin-top: -35px;
+    margin-left: -80px;
+    transform-style: preserve-3d !important;
 }
 
-.holo-line {
-    position: absolute;
-    width: 1.5px;
-    background: linear-gradient(to top, rgba(56, 189, 248, 0.85), rgba(56, 189, 248, 0.1));
-    box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
-    top: 0;
-    left: 0;
-    transform-origin: top center;
-    transform: rotateX(90deg);
-    pointer-events: none;
-}
-
-/* การ์ดโฮโลแกรม (Billboarded) */
+/* ตัวการ์ด (หันหน้าตรง คมชัด ไม่เอน) */
 .holo-card {
-    position: absolute;
-    width: 148px;
-    top: -45px;
-    left: -74px;
-    padding: 12px;
-    border-radius: 12px;
-    background: linear-gradient(160deg, rgba(56,189,248,0.2), rgba(11,19,41,0.92));
-    border: 1px solid rgba(56, 189, 248, 0.6);
-    box-shadow: 0 0 18px rgba(56, 189, 248, 0.35), inset 0 0 12px rgba(56,189,248,0.15);
-    backdrop-filter: blur(4px);
-    color: #e0f2fe;
-    text-align: left;
-    font-size: 11px;
-    line-height: 1.4;
-    transform-style: preserve-3d;
+    position: relative;
+    width: 160px;
+    padding: 12px 14px;
+    background: rgba(15, 23, 42, 0.88);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 14px;
+    color: #f8fafc;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.25), 0 8px 20px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
     will-change: transform;
-}
-
-.holo-card.overdue {
-    border-color: rgba(239, 68, 68, 0.7);
-    box-shadow: 0 0 18px rgba(239, 68, 68, 0.4), inset 0 0 12px rgba(239,68,68,0.2);
-    color: #fecaca;
-    background: linear-gradient(160deg, rgba(239,68,68,0.25), rgba(11,19,41,0.92));
+    transform-style: preserve-3d;
+    backface-visibility: visible;
 }
 
 .holo-card.completed {
-    border-color: rgba(52, 211, 153, 0.6);
-    box-shadow: 0 0 18px rgba(52, 211, 153, 0.3), inset 0 0 12px rgba(52,211,153,0.15);
-    opacity: 0.75;
+    border-color: rgba(34, 197, 94, 0.6);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.3), 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+.holo-card.overdue {
+    border-color: rgba(239, 68, 68, 0.6);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3), 0 8px 20px rgba(0, 0, 0, 0.6);
 }
 
 .holo-card .holo-title {
@@ -727,7 +650,36 @@ input:focus, textarea:focus, select:focus {
     font-weight: 600;
 }
 
-.hologram-controls {
+/* เส้นเชื่อมเนออนสีฟ้า */
+.holo-line {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    transform-origin: top center;
+    background: linear-gradient(to top, rgba(56, 189, 248, 0.15), #38bdf8) !important;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.8) !important;
+    z-index: 1;
+    display: block !important;
+}
+
+/* แกนแสงเรืองตรงกลาง */
+.holo-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    margin-left: -20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #38bdf8 0%, #0284c7 60%, transparent 100%);
+    box-shadow: 0 0 35px #38bdf8, 0 0 15px #0284c7;
+    pointer-events: none;
+}
+
+/* Controls / Hint / Empty State */
+.hologram-controls, .holo-controls {
     position: absolute;
     bottom: 12px;
     left: 0;
@@ -753,7 +705,7 @@ input:focus, textarea:focus, select:focus {
     transition: all 0.2s;
 }
 
-.holo-btn:hover, .holo-btn.active {
+.holo-btn:hover {
     background-color: #38bdf833;
     border-color: #38bdf8;
 }
@@ -770,418 +722,13 @@ input:focus, textarea:focus, select:focus {
     padding: 0 30px;
 }
 
-.hologram-hint {
+.holo-hint, .hologram-hint {
     text-align: center;
-    font-size: 11px;
-    color: #64748b;
-    margin: -8px 0 16px;
-}
-
-/* animated scanline / grid floor for hologram feel */
-.hologram-stage::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-        linear-gradient(rgba(56, 189, 248, 0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(56, 189, 248, 0.06) 1px, transparent 1px);
-    background-size: 24px 24px;
-    pointer-events: none;
-}
-
-.hologram-stage::after {
-    content: "";
-    position: absolute;
-    left: 0; right: 0;
-    top: 0;
-    height: 100%;
-    background: linear-gradient(to bottom, transparent 0%, rgba(56,189,248,0.06) 50%, transparent 100%);
-    background-size: 100% 220%;
-    animation: scan 5s linear infinite;
-    pointer-events: none;
-}
-
-@keyframes scan {
-    0% { background-position-y: 0%; }
-    100% { background-position-y: 220%; }
-}
-
-.hologram-ring-wrapper {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transform-style: preserve-3d;
-}
-
-.hologram-ring {
-    position: relative;
-    width: 1px;
-    height: 1px;
-    transform-style: preserve-3d;
-}
-
-.holo-card {
-    position: absolute;
-    width: 148px;
-    top: -56px;
-    left: -74px;
-    padding: 12px;
-    border-radius: 12px;
-    background: linear-gradient(160deg, rgba(56,189,248,0.16), rgba(11,19,41,0.85));
-    border: 1px solid rgba(56, 189, 248, 0.55);
-    box-shadow: 0 0 18px rgba(56, 189, 248, 0.35), inset 0 0 12px rgba(56,189,248,0.15);
-    backdrop-filter: blur(2px);
-    color: #e0f2fe;
-    text-align: left;
-    font-size: 11px;
-    line-height: 1.4;
-    backface-visibility: visible;
-}
-
-.holo-card.overdue {
-    border-color: rgba(239, 68, 68, 0.65);
-    box-shadow: 0 0 18px rgba(239, 68, 68, 0.35), inset 0 0 12px rgba(239,68,68,0.15);
-    color: #fecaca;
-}
-
-.holo-card.completed {
-    border-color: rgba(52, 211, 153, 0.55);
-    box-shadow: 0 0 18px rgba(52, 211, 153, 0.3), inset 0 0 12px rgba(52,211,153,0.12);
-    opacity: 0.7;
-}
-
-.holo-card .holo-title {
-    font-weight: 700;
-    font-size: 12.5px;
-    margin-bottom: 4px;
-    color: #f0f9ff;
-    word-break: break-word;
-}
-
-.holo-card .holo-date {
-    font-size: 10px;
-    color: #7dd3fc;
-    font-weight: 600;
-}
-
-.hologram-controls {
-    position: absolute;
-    bottom: 10px;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    z-index: 5;
-}
-
-.holo-btn {
-    background-color: #0b1329cc;
-    border: 1px solid #38bdf8aa;
-    color: #38bdf8;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.holo-btn:hover {
-    background-color: #38bdf822;
-}
-
-.hologram-empty {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #64748b;
-    font-size: 13px;
-    text-align: center;
-    padding: 0 30px;
-}
-
-.hologram-hint {
-    text-align: center;
-    font-size: 11px;
-    color: #475569;
-    margin: -8px 0 16px;
-}
-
-.holo-line {
-  display: none !important;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-top: 10px;
 }
 
 .hidden {
     display: none !important;
-}
-
-
-/* ==========================================
-   Detective Corkboard with Interactive Pan/Zoom
-   ========================================== */
-#holo-stage {
-  background: radial-gradient(circle, #aa6939 0%, #4a2810 100%) !important;
-  border: 5px solid #2b1406;
-  border-radius: 16px;
-  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.8);
-  position: relative;
-  min-height: 520px;
-  height: 550px;
-  overflow: hidden;
-  cursor: grab;
-  user-select: none;
-  touch-action: none;
-}
-
-#holo-stage:active {
-  cursor: grabbing;
-}
-
-/* คอนเทนเนอร์สำหรับขยายและลากกระดาน */
-.corkboard-content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transform-origin: 0 0;
-  will-change: transform;
-}
-
-/* โน้ตกระดาษ Post-it */
-.postit-card {
-  position: absolute;
-  width: 150px;
-  padding: 14px 12px;
-  background: #fef08a;
-  color: #1e293b;
-  box-shadow: 4px 6px 16px rgba(0, 0, 0, 0.45);
-  border-radius: 2px;
-  z-index: 2;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.postit-card:hover {
-  z-index: 10;
-  box-shadow: 8px 14px 24px rgba(0, 0, 0, 0.6);
-}
-
-.postit-card.completed {
-  background: #ecfdf5;
-}
-
-.postit-card.overdue {
-  background: #fff1f2;
-}
-
-/* หมุดปัก (Base Pin) */
-.board-pin {
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.8);
-  z-index: 5;
-}
-
-/* แยกสีหมุดตามสถานะ */
-.pin-green {
-  background: radial-gradient(circle at 35% 35%, #22c55e, #14532d);
-  box-shadow: 0 0 8px #22c55e;
-}
-
-.pin-orange {
-  background: radial-gradient(circle at 35% 35%, #f97316, #7c2d12);
-  box-shadow: 0 0 8px #f97316;
-}
-
-.pin-red {
-  background: radial-gradient(circle at 35% 35%, #ef4444, #7f1d1d);
-  box-shadow: 0 0 10px #ef4444;
-  animation: pulse-red-pin 1.5s infinite alternate;
-}
-
-@keyframes pulse-red-pin {
-  0% { box-shadow: 0 0 6px #ef4444; }
-  100% { box-shadow: 0 0 16px #ef4444, 0 0 22px #f87171; }
-}
-
-/* สายไหมพรมสีแดง */
-.string-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 2000px;
-  height: 2000px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.string-line {
-  stroke: #dc2626;
-  stroke-width: 2.5;
-  stroke-dasharray: 0;
-  filter: drop-shadow(2px 3px 3px rgba(0, 0, 0, 0.6));
-}
-
-/* ปุ่มควบคุมการซูมมุมขวาบน */
-.board-controls {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  gap: 6px;
-  z-index: 20;
-}
-
-.board-btn {
-  background: rgba(15, 23, 42, 0.75);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  width: 34px;
-  height: 34px;
-  font-size: 1.1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  backdrop-filter: blur(4px);
-  transition: background 0.2s;
-}
-
-.board-btn:hover {
-  background: rgba(30, 41, 59, 0.9);
-}
-
-/* ==========================================
-   3D Calendar Stage (กระดาน 3D เดิม + หมุด 3 สี และสายเนออนสีแดง)
-   ========================================== */
-#holo-stage {
-  perspective: 1000px !important;
-  position: relative;
-  min-height: 480px;
-  height: 500px;
-  overflow: hidden;
-  cursor: grab;
-  user-select: none;
-  touch-action: none;
-  background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%) !important;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-#holo-stage:active {
-  cursor: grabbing;
-}
-
-#holo-ring {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-  transition: transform 0.1s ease-out;
-}
-
-.holo-card-node {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin-top: -80px;
-  margin-left: -90px;
-  transform-style: preserve-3d;
-}
-
-.holo-card {
-  position: relative;
-  width: 180px;
-  padding: 16px 14px;
-  background: rgba(30, 41, 59, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  color: #f8fafc;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
-}
-
-.holo-card.completed {
-  border-color: rgba(34, 197, 94, 0.5);
-  background: rgba(20, 83, 45, 0.65);
-}
-
-.holo-card.overdue {
-  border-color: rgba(239, 68, 68, 0.6);
-  background: rgba(127, 29, 29, 0.65);
-}
-
-/* หมุดปัก (Base Pin) */
-.board-pin {
-  position: absolute;
-  top: -7px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  border: 1.5px solid #ffffff;
-  z-index: 10;
-}
-
-/* แยกสีหมุดเรืองแสงตามสถานะ */
-.pin-green {
-  background: radial-gradient(circle at 35% 35%, #22c55e, #14532d);
-  box-shadow: 0 0 8px #22c55e;
-}
-
-.pin-orange {
-  background: radial-gradient(circle at 35% 35%, #f97316, #7c2d12);
-  box-shadow: 0 0 8px #f97316;
-}
-
-.pin-red {
-  background: radial-gradient(circle at 35% 35%, #ef4444, #7f1d1d);
-  box-shadow: 0 0 10px #ef4444;
-  animation: pulse-red-pin 1.5s infinite alternate;
-}
-
-@keyframes pulse-red-pin {
-  0% { box-shadow: 0 0 6px #ef4444; }
-  100% { box-shadow: 0 0 16px #ef4444, 0 0 24px #f87171; }
-}
-
-/* สายสีแดงเนออนเชื่อมแกนกลาง */
-.holo-line {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 2px;
-  transform-origin: top center;
-  background: linear-gradient(to top, rgba(239, 68, 68, 0.15), #ef4444) !important;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.8) !important;
-  z-index: 1;
-}
-
-/* แกนกลาง 3D */
-.holo-core {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 60px;
-  height: 60px;
-  margin-top: -30px;
-  margin-left: -30px;
-  border-radius: 50%;
-  border: 2px solid rgba(239, 68, 68, 0.5);
-  box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
-  pointer-events: none;
 }
