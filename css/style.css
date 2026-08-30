@@ -563,19 +563,197 @@ input:focus, textarea:focus, select:focus {
 /* ---------- 3D Holographic Calendar View ---------- */
 .hologram-stage {
     position: relative;
-    height: 380px;
+    height: 420px;
     margin-bottom: 16px;
     border-radius: 20px;
-    background: radial-gradient(ellipse at center, #06122a 0%, #030712 70%);
+    background: radial-gradient(ellipse at center, #06122a 0%, #030712 75%);
     border: 1px solid #1e293b;
     overflow: hidden;
-    perspective: 900px;
+    perspective: 1000px;
     touch-action: none;
     cursor: grab;
 }
 
 .hologram-stage:active {
     cursor: grabbing;
+}
+
+.hologram-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+}
+
+.hologram-stage::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 0; height: 100%;
+    background: linear-gradient(to bottom, transparent 0%, rgba(56,189,248,0.06) 50%, transparent 100%);
+    background-size: 100% 220%;
+    animation: scan 5s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes scan {
+    0% { background-position-y: 0%; }
+    100% { background-position-y: 220%; }
+}
+
+.hologram-ring-wrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+}
+
+.hologram-ring {
+    position: relative;
+    width: 0;
+    height: 0;
+    transform-style: preserve-3d;
+}
+
+/* แกนกลางโฮโลแกรม */
+.holo-core {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: -12px;
+    left: -12px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #38bdf8 0%, rgba(56, 189, 248, 0.3) 60%, transparent 100%);
+    box-shadow: 0 0 20px #38bdf8, 0 0 40px #0284c7;
+    animation: corePulse 2s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes corePulse {
+    0% { transform: scale(0.85); opacity: 0.7; }
+    100% { transform: scale(1.15); opacity: 1; }
+}
+
+/* Node ระบุตำแหน่งและเส้นเชื่อม */
+.holo-card-node {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-style: preserve-3d;
+}
+
+.holo-line {
+    position: absolute;
+    width: 1.5px;
+    background: linear-gradient(to top, rgba(56, 189, 248, 0.85), rgba(56, 189, 248, 0.1));
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+    top: 0;
+    left: 0;
+    transform-origin: top center;
+    transform: rotateX(90deg);
+    pointer-events: none;
+}
+
+/* การ์ดโฮโลแกรม (Billboarded) */
+.holo-card {
+    position: absolute;
+    width: 148px;
+    top: -45px;
+    left: -74px;
+    padding: 12px;
+    border-radius: 12px;
+    background: linear-gradient(160deg, rgba(56,189,248,0.2), rgba(11,19,41,0.92));
+    border: 1px solid rgba(56, 189, 248, 0.6);
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.35), inset 0 0 12px rgba(56,189,248,0.15);
+    backdrop-filter: blur(4px);
+    color: #e0f2fe;
+    text-align: left;
+    font-size: 11px;
+    line-height: 1.4;
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+.holo-card.overdue {
+    border-color: rgba(239, 68, 68, 0.7);
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.4), inset 0 0 12px rgba(239,68,68,0.2);
+    color: #fecaca;
+    background: linear-gradient(160deg, rgba(239,68,68,0.25), rgba(11,19,41,0.92));
+}
+
+.holo-card.completed {
+    border-color: rgba(52, 211, 153, 0.6);
+    box-shadow: 0 0 18px rgba(52, 211, 153, 0.3), inset 0 0 12px rgba(52,211,153,0.15);
+    opacity: 0.75;
+}
+
+.holo-card .holo-title {
+    font-weight: 700;
+    font-size: 12.5px;
+    margin-bottom: 4px;
+    color: #f0f9ff;
+    word-break: break-word;
+}
+
+.holo-card .holo-date {
+    font-size: 10px;
+    color: #7dd3fc;
+    font-weight: 600;
+}
+
+.hologram-controls {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    z-index: 5;
+}
+
+.holo-btn {
+    background-color: #0b1329ee;
+    border: 1px solid #38bdf8aa;
+    color: #38bdf8;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.holo-btn:hover, .holo-btn.active {
+    background-color: #38bdf833;
+    border-color: #38bdf8;
+}
+
+.hologram-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 13px;
+    text-align: center;
+    padding: 0 30px;
+}
+
+.hologram-hint {
+    text-align: center;
+    font-size: 11px;
+    color: #64748b;
+    margin: -8px 0 16px;
 }
 
 /* animated scanline / grid floor for hologram feel */
