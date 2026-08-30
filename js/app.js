@@ -471,10 +471,6 @@
       node.setAttribute('data-angle', angle);
       node.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
 
-      const line = document.createElement('div');
-      line.className = 'holo-line';
-      line.style.height = `${radius}px`;
-
       const card = document.createElement('div');
       card.className = `holo-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
       card.innerHTML = `
@@ -482,7 +478,6 @@
         <div class="holo-date">⏰ ${formatDateTimeDisplay(task.dueDate)}</div>
       `;
 
-      node.appendChild(line);
       node.appendChild(card);
       holoRing.appendChild(node);
     });
