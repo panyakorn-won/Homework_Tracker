@@ -1042,3 +1042,125 @@ input:focus, textarea:focus, select:focus {
 .board-btn:hover {
   background: rgba(30, 41, 59, 0.9);
 }
+
+/* ==========================================
+   3D Calendar Stage (กระดาน 3D เดิม + หมุด 3 สี และสายเนออนสีแดง)
+   ========================================== */
+#holo-stage {
+  perspective: 1000px !important;
+  position: relative;
+  min-height: 480px;
+  height: 500px;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%) !important;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#holo-stage:active {
+  cursor: grabbing;
+}
+
+#holo-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+}
+
+.holo-card-node {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -80px;
+  margin-left: -90px;
+  transform-style: preserve-3d;
+}
+
+.holo-card {
+  position: relative;
+  width: 180px;
+  padding: 16px 14px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: #f8fafc;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+.holo-card.completed {
+  border-color: rgba(34, 197, 94, 0.5);
+  background: rgba(20, 83, 45, 0.65);
+}
+
+.holo-card.overdue {
+  border-color: rgba(239, 68, 68, 0.6);
+  background: rgba(127, 29, 29, 0.65);
+}
+
+/* หมุดปัก (Base Pin) */
+.board-pin {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid #ffffff;
+  z-index: 10;
+}
+
+/* แยกสีหมุดเรืองแสงตามสถานะ */
+.pin-green {
+  background: radial-gradient(circle at 35% 35%, #22c55e, #14532d);
+  box-shadow: 0 0 8px #22c55e;
+}
+
+.pin-orange {
+  background: radial-gradient(circle at 35% 35%, #f97316, #7c2d12);
+  box-shadow: 0 0 8px #f97316;
+}
+
+.pin-red {
+  background: radial-gradient(circle at 35% 35%, #ef4444, #7f1d1d);
+  box-shadow: 0 0 10px #ef4444;
+  animation: pulse-red-pin 1.5s infinite alternate;
+}
+
+@keyframes pulse-red-pin {
+  0% { box-shadow: 0 0 6px #ef4444; }
+  100% { box-shadow: 0 0 16px #ef4444, 0 0 24px #f87171; }
+}
+
+/* สายสีแดงเนออนเชื่อมแกนกลาง */
+.holo-line {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  transform-origin: top center;
+  background: linear-gradient(to top, rgba(239, 68, 68, 0.15), #ef4444) !important;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.8) !important;
+  z-index: 1;
+}
+
+/* แกนกลาง 3D */
+.holo-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  margin-top: -30px;
+  margin-left: -30px;
+  border-radius: 50%;
+  border: 2px solid rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+  pointer-events: none;
+}
