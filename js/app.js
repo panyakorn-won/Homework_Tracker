@@ -737,5 +737,132 @@
     }
   }
 
+  // ==========================================
+// ระบบเชื่อมต่อ UI และ ปุ่มกดทั้งหมด (Event Wiring)
+// ==========================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. ดึง Elements หลักจาก HTML
+  const taskForm = document.getElementById('taskForm') || document.querySelector('form');
+  const openModalBtn = document.getElementById('btnAddTask') || document.getElementById('openModalBtn');
+  const closeModalBtn = document.getElementById('closeModalBtn') || document.getElementById('btnCancel');
+  const modal = document.getElementById('taskModal');
+  const navTabs = document.querySelectorAll('.nav-tab, [data-view]');
+
+  // ------------------------------------------
+  // 2. ระบบเปิด-ปิด Modal เพิ่มงาน
+  // ------------------------------------------
+  if (openModalBtn && modal) {
+    openModalBtn.addEventListener('click', () => {
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex'; // ดัน Modal ขึ้นมาแสดง
+    });
+  }
+
+  if (closeModalBtn && modal) {
+    closeModalBtn.addEventListener('click', () => {
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    });
+  }
+
+  // ปิด Modal เมื่อแตะพื้นที่ว่างข้างนอก
+  window.addEventListener('click', (e) => {
+    if (modal && e.target === modal) {
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+  });
+
+  // ------------------------------------------
+  // 3. ระบบสลับแท็บหน้าจอ (Navigation Views)
+  // ------------------------------------------
+  navTabs.forEach((tab) => {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetView = tab.getAttribute('data-view');
+      if (!targetView) return;
+
+      // ปิดทุกหน้าจอ
+      document.querySelectorAll('.view-section').forEach((view) => {
+        view.classList.add('hidden');
+        view.style.display = 'none';
+      });
+
+      // เปิดหน้าจอที่เลือก
+      const activeView = document.getElementById(targetView);
+      if (activeView) {
+        activeView.classList.remove('hidden');
+        activeView.style.display = 'block';
+      }
+
+      // เปลี่ยนสถานะ Active ของปุ่มแท็บ
+      navTabs.forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      // ถ้าสลับมาหน้า 3D Hologram ให้สั่ง Re-render
+      if (targetView === 'hologramView' && typeof renderHologram === 'function') {
+        renderHologram();
+      }
+    });
+  });
+
+  // ------------------------------------------
+  // 4. ระบบกดบันทึกงาน (Form Submit)
+  // ------------------------------------------
+  if (taskForm) {
+    taskForm.addEventListener('submit', async (e) => {
+      e.preventDefault(); // สำคัญมาก: ป้องกันหน้าเว็บ Refresh เอง
+
+      const titleInput = document.getElementById('taskTitle');
+      const dateInput = document.getElementById('taskDueDate');
+      const noteInput = document.getElementById('taskNote');
+
+      if (!titleInput || !titleInput.value.trim()) {
+        alert('กรุณากรอกชื่อหัวข้องานก่อนครับ');
+        return;
+      }
+
+      // สร้างวัตถุงานใหม่
+      const newTask = {
+        id: Date.now().toString(),
+        title: titleInput.value.trim(),
+        dueDate: dateInput ? dateInput.value : '',
+        note: noteInput ? noteInput.value.trim() : '',
+        completed: false,
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        // เพิ่มงานลง Array หลักของแอป
+        if (Array.isArray(window.tasks)) {
+          window.tasks.push(newTask);
+        } else if (typeof tasks !== 'undefined') {
+          tasks.push(newTask);
+        }
+
+        // บันทึกลง LocalStorage/IndexedDB (ถ้ามี)
+        localStorage.setItem('cognitask_data', JSON.stringify(window.tasks || tasks));
+
+        // อัปเดตหน้าจอ List และ 3D Hologram
+        if (typeof renderTasks === 'function') renderTasks();
+        if (typeof renderHologram === 'function') renderHologram();
+
+        // ล้างข้อมูลในฟอร์มและปิด Modal
+        taskForm.reset();
+        if (modal) {
+          modal.classList.add('hidden');
+          modal.style.display = 'none';
+        }
+
+        alert('บันทึกงานเรียบร้อยแล้ว!');
+      } catch (err) {
+        console.error('Save task error:', err);
+        alert('เกิดข้อผิดพลาดในการบันทึก: ' + err.message);
+      }
+    });
+  }
+});
+
   init();
 })();
