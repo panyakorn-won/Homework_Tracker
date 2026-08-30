@@ -9,14 +9,19 @@
   let editingTaskId = null;
   let authMode = 'login'; // 'login' | 'register'
 
-  // ---------- Corkboard (Detective Board) State ----------
-  let boardX = 0;
-  let boardY = 0;
-  let boardScale = 1.0;
-  let isBoardDragging = false;
-  let boardLastX = 0;
-  let boardLastY = 0;
-  let initialPinchDistBoard = null;
+  // ---------- 3D Hologram Stage State ----------
+  let holoAngleX = -10;
+  let holoAngleY = 0;
+  let isHoloDragging = false;
+  let holoLastX = 0;
+  let holoLastY = 0;
+
+  function applyHoloRotation() {
+    const holoRing = document.getElementById('holo-ring');
+    if (holoRing) {
+      holoRing.style.transform = `rotateX(${holoAngleX}deg) rotateY(${holoAngleY}deg)`;
+    }
+  }
 
   // ---------- DOM References ----------
   const $ = (id) => document.getElementById(id);
@@ -63,6 +68,7 @@
   const authUserEmail = $('auth-user-email');
 
   const holoStage = $('holo-stage');
+  const holoRing = $('holo-ring');
   const holoEmpty = $('holo-empty');
 
   // ---------- Persistence + Sync ----------
@@ -418,27 +424,13 @@
     });
   }
 
-  // ---------- Detective Corkboard (Interactive Pan/Zoom & Pin Board) ----------
-  function applyBoardTransform() {
-    const contentWrapper = document.getElementById('corkboard-content');
-    if (contentWrapper) {
-      contentWrapper.style.transform = `translate(${boardX}px, ${boardY}px) scale(${boardScale})`;
-    }
-  }
-
-  function resetBoardView() {
-    boardX = 20;
-    boardY = 20;
-    boardScale = 1.0;
-    applyBoardTransform();
-  }
-
+  // ---------- Original 3D Calendar Renderer ----------
   function renderHologram() {
-    if (!holoStage) return;
+    if (!holoRing) return;
     const upcoming = tasks.filter((t) => t.dueDate).slice();
     upcoming.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
 
-    holoStage.innerHTML = '';
+    holoRing.innerHTML = '';
 
     if (upcoming.length === 0) {
       if (holoEmpty) holoEmpty.classList.remove('hidden');
@@ -446,32 +438,16 @@
     }
     if (holoEmpty) holoEmpty.classList.add('hidden');
 
-    // Controls (+ / - / Reset)
-    const controls = document.createElement('div');
-    controls.className = 'board-controls';
-    controls.innerHTML = `
-      <button class="board-btn" id="btn-zoom-in" title="Zoom In">➕</button>
-      <button class="board-btn" id="btn-zoom-out" title="Zoom Out">➖</button>
-      <button class="board-btn" id="btn-zoom-reset" title="Reset View">🎯</button>
-    `;
-    holoStage.appendChild(controls);
+    const core = document.createElement('div');
+    core.className = 'holo-core';
+    holoRing.appendChild(core);
 
-    // Main Content Wrapper for Pan/Zoom
-    const contentWrapper = document.createElement('div');
-    contentWrapper.id = 'corkboard-content';
-    contentWrapper.className = 'corkboard-content';
-    holoStage.appendChild(contentWrapper);
-
-    // SVG Canvas for Red Yarn
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('class', 'string-canvas');
-    contentWrapper.appendChild(svg);
-
-    const pins = [];
+    const count = upcoming.length;
+    const radius = Math.max(150, Math.min(240, count * 30));
     const nowIso = new Date().toISOString().slice(0, 16);
-    const stageWidth = holoStage.clientWidth || 360;
 
     upcoming.forEach((task, i) => {
+      const angle = (360 / count) * i;
       const isOverdue = !task.completed && task.dueDate < nowIso;
 
       // Pin Color: Green = Completed / Red = Overdue / Orange = Pending
@@ -482,123 +458,56 @@
         pinClass = 'pin-red';
       }
 
-      const col = i % 2;
-      const row = Math.floor(i / 2);
-      const x = col === 0 ? 30 + (i * 20) % 40 : stageWidth - 180 - (i * 15) % 40;
-      const y = 40 + row * 145 + (i % 3) * 15;
-      const rotate = ((i * 11) % 16 - 8);
+      const node = document.createElement('div');
+      node.className = 'holo-card-node';
+      node.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
 
+      // สายเนออนสีแดงเชื่อมเข้าแกนกลาง
+      const line = document.createElement('div');
+      line.className = 'holo-line';
+      line.style.height = `${radius}px`;
+
+      // การ์ด 3D
       const card = document.createElement('div');
-      card.className = `postit-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
-      card.style.left = `${x}px`;
-      card.style.top = `${y}px`;
-      card.style.transform = `rotate(${rotate}deg)`;
-
+      card.className = `holo-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
       card.innerHTML = `
         <div class="board-pin ${pinClass}"></div>
-        <div style="font-weight: bold; font-size: 0.85rem; margin-bottom: 6px; word-break: break-word;">${escapeHtml(task.title)}</div>
-        <div style="font-size: 0.75rem; color: #475569;">⏰ ${formatDateTimeDisplay(task.dueDate)}</div>
+        <div class="holo-title" style="font-weight: bold; margin-bottom: 4px;">${escapeHtml(task.title)}</div>
+        <div class="holo-date" style="font-size: 0.75rem; opacity: 0.8;">⏰ ${formatDateTimeDisplay(task.dueDate)}</div>
       `;
 
-      contentWrapper.appendChild(card);
-
-      pins.push({
-        x: x + 75,
-        y: y - 1
-      });
+      node.appendChild(line);
+      node.appendChild(card);
+      holoRing.appendChild(node);
     });
 
-    // Draw Red Yarn Connecting Pins
-    for (let i = 0; i < pins.length - 1; i++) {
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', pins[i].x);
-      line.setAttribute('y1', pins[i].y);
-      line.setAttribute('x2', pins[i + 1].x);
-      line.setAttribute('y2', pins[i + 1].y);
-      line.setAttribute('class', 'string-line');
-      svg.appendChild(line);
-    }
-
-    applyBoardTransform();
-
-    document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
-      boardScale = Math.min(2.5, boardScale + 0.25);
-      applyBoardTransform();
-    });
-    document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
-      boardScale = Math.max(0.4, boardScale - 0.25);
-      applyBoardTransform();
-    });
-    document.getElementById('btn-zoom-reset')?.addEventListener('click', resetBoardView);
+    applyHoloRotation();
   }
 
-  // ---------- Pan & Zoom Handlers ----------
+  // ---------- 3D Drag Control Events ----------
   if (holoStage) {
     holoStage.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('.board-controls')) return;
-      isBoardDragging = true;
-      boardLastX = e.clientX;
-      boardLastY = e.clientY;
+      isHoloDragging = true;
+      holoLastX = e.clientX;
+      holoLastY = e.clientY;
     });
 
     window.addEventListener('pointermove', (e) => {
-      if (!isBoardDragging) return;
-      const deltaX = e.clientX - boardLastX;
-      const deltaY = e.clientY - boardLastY;
+      if (!isHoloDragging) return;
+      const deltaX = e.clientX - holoLastX;
+      const deltaY = e.clientY - holoLastY;
 
-      boardX += deltaX;
-      boardY += deltaY;
+      holoAngleY += deltaX * 0.4;
+      holoAngleX = Math.max(-45, Math.min(45, holoAngleX - deltaY * 0.3));
 
-      boardLastX = e.clientX;
-      boardLastY = e.clientY;
+      holoLastX = e.clientX;
+      holoLastY = e.clientY;
 
-      applyBoardTransform();
+      applyHoloRotation();
     });
 
     window.addEventListener('pointerup', () => {
-      isBoardDragging = false;
-    });
-
-    holoStage.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const zoomSpeed = 0.08;
-      if (e.deltaY < 0) {
-        boardScale = Math.min(2.5, boardScale + zoomSpeed);
-      } else {
-        boardScale = Math.max(0.4, boardScale - zoomSpeed);
-      }
-      applyBoardTransform();
-    }, { passive: false });
-
-    const getPinchDist = (touches) => {
-      return Math.hypot(
-        touches[0].clientX - touches[1].clientX,
-        touches[0].clientY - touches[1].clientY
-      );
-    };
-
-    holoStage.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 2) {
-        isBoardDragging = false;
-        initialPinchDistBoard = getPinchDist(e.touches);
-      }
-    }, { passive: true });
-
-    holoStage.addEventListener('touchmove', (e) => {
-      if (e.touches.length === 2 && initialPinchDistBoard) {
-        e.preventDefault();
-        const dist = getPinchDist(e.touches);
-        const diff = (dist - initialPinchDistBoard) * 0.005;
-        boardScale = Math.max(0.4, Math.min(2.5, boardScale + diff));
-        initialPinchDistBoard = dist;
-        applyBoardTransform();
-      }
-    }, { passive: false });
-
-    holoStage.addEventListener('touchend', (e) => {
-      if (e.touches.length < 2) {
-        initialPinchDistBoard = null;
-      }
+      isHoloDragging = false;
     });
   }
 
