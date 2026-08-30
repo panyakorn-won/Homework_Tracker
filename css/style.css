@@ -732,3 +732,9 @@ input:focus, textarea:focus, select:focus {
 .hidden {
     display: none !important;
 }
+
+/* ซ่อนแผง 3 ปุ่มด้านล่าง และซ่อนเส้นแสงสีฟ้าใต้การ์ด */
+.hologram-controls,
+.holo-line {
+  display: none !important;
+}
