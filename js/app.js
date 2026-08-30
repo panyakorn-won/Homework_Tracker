@@ -12,15 +12,16 @@
   // ---------- 3D Hologram Stage State ----------
   let holoAngleX = -10;
   let holoAngleY = 0;
+  let holoScale = 1; // เพิ่มตัวแปรสำหรับการซูม
   let isHoloDragging = false;
   let holoLastX = 0;
   let holoLastY = 0;
 
-  // 💡 Billboard Function: คำนวณให้การ์ดหันหน้าตรงหาผู้ใช้เสมอ ไม่เอนไปข้างหลัง
+  // 💡 Billboard Function: คำนวณให้การ์ดหันหน้าตรงหาผู้ใช้เสมอ + รองรับการซูม (scale)
   function applyHoloRotation() {
     const holoRing = document.getElementById('holo-ring');
     if (holoRing) {
-      holoRing.style.transform = `rotateX(${holoAngleX}deg) rotateY(${holoAngleY}deg)`;
+      holoRing.style.transform = `scale(${holoScale}) rotateX(${holoAngleX}deg) rotateY(${holoAngleY}deg)`;
     }
 
     // หักลบมุมหมุนเพื่อให้การ์ดตั้งตรง คมชัด อ่านง่าย
@@ -345,7 +346,9 @@
     viewCalendar.classList.toggle('hidden', isList);
     viewListBtn.classList.toggle('active', isList);
     viewCalendarBtn.classList.toggle('active', !isList);
-    if (!isList) renderHologram();
+    if (!isList) {
+      renderHologram();
+    }
   }
   viewListBtn.addEventListener('click', () => setView('list'));
   viewCalendarBtn.addEventListener('click', () => setView('calendar'));
@@ -487,13 +490,27 @@
     applyHoloRotation();
   }
 
-  // ---------- Drag Control ----------
+  // ---------- Drag & Wheel Zoom Control ----------
   if (holoStage) {
+    // 1. ระบบซูมด้วยลูกกลิ้งเมาส์ (Mouse Wheel Zoom)
+    holoStage.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomSpeed = 0.08;
+      if (e.deltaY > 0) {
+        holoScale = Math.max(0.4, holoScale - zoomSpeed); // ซูมออก
+      } else {
+        holoScale = Math.min(2.5, holoScale + zoomSpeed); // ซูมเข้า
+      }
+      applyHoloRotation();
+    }, { passive: false });
+
+    // 2. ระบบคลิกลากหมุน (Pointer/Touch Drag)
     holoStage.addEventListener('pointerdown', (e) => {
       if (e.target.closest('.holo-controls')) return;
       isHoloDragging = true;
       holoLastX = e.clientX;
       holoLastY = e.clientY;
+      try { holoStage.setPointerCapture(e.pointerId); } catch (err) {}
     });
 
     window.addEventListener('pointermove', (e) => {
@@ -502,7 +519,7 @@
       const deltaY = e.clientY - holoLastY;
 
       holoAngleY += deltaX * 0.4;
-      holoAngleX = Math.max(-30, Math.min(30, holoAngleX - deltaY * 0.3));
+      holoAngleX = Math.max(-60, Math.min(60, holoAngleX - deltaY * 0.3));
 
       holoLastX = e.clientX;
       holoLastY = e.clientY;
@@ -510,8 +527,11 @@
       applyHoloRotation();
     });
 
-    window.addEventListener('pointerup', () => {
-      isHoloDragging = false;
+    window.addEventListener('pointerup', (e) => {
+      if (isHoloDragging) {
+        isHoloDragging = false;
+        try { holoStage.releasePointerCapture(e.pointerId); } catch (err) {}
+      }
     });
   }
 
@@ -611,7 +631,3 @@
 
   init();
 })();
-
-    // เรียกทำงานครั้งแรกเพื่อจัดตำแหน่งเริ่มต้น
-    updateStage();
-});
