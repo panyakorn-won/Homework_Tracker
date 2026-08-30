@@ -1,446 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
+
     <title>Homework Tracker</title>
     <meta name="description" content="Homework Tracker - Intelligent Academic Tracker & Planner">
-    
+
     <meta property="og:type" content="website">
     <meta property="og:title" content="Homework Tracker">
     <meta property="og:description" content="Homework Tracker - Intelligent Academic Tracker & Planner">
     <meta property="og:url" content="https://panyakorn-won.github.io/Homework_Tracker/">
     <meta property="og:image" content="https://panyakorn-won.github.io/Homework_Tracker/icon-512.png">
-    
+
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="shortcut icon" href="icon-192.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#030712">
-
-    <style>
-        * { 
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: #030712;
-            color: #f3f4f6;
-            min-height: 100vh;
-            padding: 20px 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 480px;
-        }
-
-        /* Header & Logo */
-        .header {
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .brand-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 6px;
-        }
-
-        .app-logo {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            object-fit: cover;
-            background-color: #1e293b;
-        }
-
-        h1 {
-            font-size: 26px;
-            font-weight: 800;
-            color: #ffffff;
-            letter-spacing: -0.5px;
-        }
-
-        .subtitle {
-            font-size: 13px;
-            color: #94a3b8;
-            font-weight: 400;
-        }
-
-        .btn-notify {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            color: #f8fafc;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
-        }
-
-        .btn-notify.active {
-            background-color: #0284c722;
-            border-color: #38bdf8;
-            color: #38bdf8;
-        }
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background-color: #0b1329;
-            border: 1px solid #1e293b;
-            border-radius: 12px;
-            padding: 14px 8px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 22px;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: #64748b;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Form Card */
-        .card {
-            background-color: #0b1329;
-            border: 1px solid #1e293b;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #38bdf8;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .form-group {
-            margin-bottom: 14px;
-            min-width: 0;
-        }
-
-        label {
-            display: block;
-            font-size: 11px;
-            font-weight: 700;
-            color: #64748b;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            letter-spacing: 0.5px;
-        }
-
-        input[type="text"], input[type="date"], input[type="datetime-local"], textarea, select {
-            width: 100%;
-            min-width: 0;
-            max-width: 100%;
-            padding: 12px 10px;
-            background-color: #030712;
-            border: 1px solid #1e293b;
-            border-radius: 10px;
-            color: #f3f4f6;
-            font-size: 13px;
-            outline: none;
-            transition: border-color 0.2s;
-            box-sizing: border-box;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        input[type="date"], input[type="datetime-local"] {
-            min-height: 44px;
-            color-scheme: dark;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 64px;
-            font-size: 14px;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            border-color: #3b82f6;
-        }
-
-        .date-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 100%;
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background-color: #3b82f6;
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 6px;
-            transition: background-color 0.2s;
-        }
-
-        .btn-primary:active {
-            background-color: #2563eb;
-        }
-
-        /* Controls Section (Search, Sort) */
-        .controls-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-
-        .search-box {
-            position: relative;
-            flex: 1;
-        }
-
-        .search-box input {
-            padding-left: 36px;
-            font-size: 13px;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #64748b;
-        }
-
-        .sort-select-wrapper {
-            width: 150px;
-            position: relative;
-        }
-
-        .sort-select-wrapper select {
-            padding-right: 24px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%3C%2394a3b8' %3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 14px;
-            cursor: pointer;
-        }
-
-        /* Filters */
-        .filter-tabs {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            margin-bottom: 16px;
-            padding-bottom: 4px;
-        }
-
-        .tab {
-            padding: 8px 16px;
-            border-radius: 20px;
-            background-color: #0b1329;
-            border: 1px solid #1e293b;
-            color: #94a3b8;
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tab.active {
-            background-color: #3b82f6;
-            color: #ffffff;
-            border-color: #3b82f6;
-        }
-
-        /* Task List Container */
-        .task-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .task-item {
-            background-color: #0b1329;
-            border: 1px solid #1e293b;
-            border-radius: 14px;
-            padding: 16px;
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 12px;
-            transition: all 0.2s;
-        }
-
-        .task-item.completed {
-            opacity: 0.75;
-            border-color: #10b98144;
-            background-color: #064e3b15;
-        }
-
-        .task-item.overdue {
-            border-color: #ef444466;
-        }
-
-        .task-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .task-title-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 6px;
-        }
-
-        .task-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #f3f4f6;
-            word-break: break-word;
-        }
-
-        .task-item.completed .task-title {
-            text-decoration: line-through;
-            color: #9ca3af;
-        }
-
-        /* Task Note Box */
-        .task-note {
-            font-size: 13px;
-            color: #cbd5e1;
-            background-color: #030712aa;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border-left: 3px solid #38bdf8;
-            margin-bottom: 8px;
-            word-break: break-word;
-            white-space: pre-wrap;
-        }
-
-        .task-item.completed .task-note {
-            border-left-color: #64748b;
-            color: #94a3b8;
-        }
-
-        /* Badges */
-        .status-badge {
-            font-size: 10px;
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-pending {
-            background-color: #0284c722;
-            color: #38bdf8;
-            border: 1px solid #0284c744;
-        }
-
-        .badge-completed {
-            background-color: #10b98122;
-            color: #34d399;
-            border: 1px solid #10b98144;
-        }
-
-        .task-dates {
-            font-size: 12px;
-            color: #64748b;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .task-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-action {
-            background: none;
-            border: 1px solid #1e293b;
-            color: #94a3b8;
-            padding: 8px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .btn-check {
-            border-color: #10b98155;
-            color: #10b981;
-        }
-
-        .btn-check:hover, .btn-check.active-check {
-            background-color: #10b98122;
-        }
-
-        .btn-delete {
-            border-color: #ef444455;
-            color: #ef4444;
-        }
-
-        .btn-delete:hover {
-            background-color: #ef444422;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #64748b;
-        }
-
-        .empty-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
-            opacity: 0.6;
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -449,18 +28,23 @@
         <header class="header">
             <div>
                 <div class="brand-title">
-                    <img src="icon-192.png" alt="Logo" class="app-logo" onerror="this.style.display='none'">
+                    <img src="icon-192.png" alt="" class="app-logo" onerror="this.style.display='none'">
                     <h1>Homework Tracker</h1>
                 </div>
                 <p class="subtitle">Intelligent Academic Tracker & Planner</p>
             </div>
-            <button id="btn-notification" class="btn-notify" onclick="toggleNotificationPermission()">
-                🔔 Notifications
-            </button>
+            <div class="header-actions">
+                <button id="btn-notification" class="btn-notify" onclick="toggleNotificationPermission()" aria-pressed="false" aria-label="เปิด/ปิดการแจ้งเตือน">
+                    🔔 Notifications
+                </button>
+                <button id="btn-sync" class="btn-sync" aria-label="เข้าสู่ระบบเพื่อซิงค์ข้อมูลข้ามอุปกรณ์">
+                    ☁️ Sign in to sync
+                </button>
+            </div>
         </header>
 
         <!-- Stats -->
-        <div class="stats-grid">
+        <div class="stats-grid" role="group" aria-label="สรุปสถิติงาน">
             <div class="stat-card">
                 <div class="stat-number" id="total-count">0</div>
                 <div class="stat-label">Total Tasks</div>
@@ -475,373 +59,164 @@
             </div>
         </div>
 
-        <!-- Form Card -->
-        <div class="card">
-            <div class="card-title">+ Create New Task</div>
-            <form id="task-form">
-                <div class="form-group">
-                    <label>Task Title / Subject</label>
-                    <input type="text" id="task-input" placeholder="e.g. Physics Ch. 5 Problems" required>
-                </div>
-                <div class="form-group">
-                    <label>Notes / Details (Optional)</label>
-                    <textarea id="task-note" rows="2" placeholder="e.g. Submit via Google Classroom / Group project"></textarea>
-                </div>
-                <div class="date-row">
+        <!-- View Switcher -->
+        <div class="view-switcher" role="tablist" aria-label="สลับมุมมอง">
+            <button id="view-list-btn" class="active" role="tab" aria-selected="true" aria-label="มุมมองรายการ">📋 List</button>
+            <button id="view-calendar-btn" role="tab" aria-selected="false" aria-label="มุมมองปฏิทิน 3 มิติแบบหมุนได้">🪐 3D Calendar</button>
+        </div>
+
+        <!-- ===== LIST VIEW ===== -->
+        <div id="view-list">
+            <!-- Form Card -->
+            <div class="card">
+                <div class="card-title">+ Create New Task</div>
+                <form id="task-form">
                     <div class="form-group">
-                        <label>Assigned Date</label>
-                        <input type="date" id="assigned-date">
+                        <label for="task-input">Task Title / Subject</label>
+                        <input type="text" id="task-input" placeholder="e.g. Physics Ch. 5 Problems" required aria-required="true">
                     </div>
                     <div class="form-group">
-                        <label>Due Date & Time</label>
-                        <input type="datetime-local" id="due-date">
+                        <label for="task-note">Notes / Details (Optional)</label>
+                        <textarea id="task-note" rows="2" placeholder="e.g. Submit via Google Classroom / Group project"></textarea>
                     </div>
+                    <div class="date-row">
+                        <div class="form-group">
+                            <label for="assigned-date">Assigned Date</label>
+                            <input type="date" id="assigned-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="due-date">Due Date & Time</label>
+                            <input type="datetime-local" id="due-date">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Save Task</button>
+                </form>
+            </div>
+
+            <!-- Controls: Search & Sort -->
+            <div class="controls-row">
+                <div class="search-box">
+                    <span class="search-icon" aria-hidden="true">🔍</span>
+                    <input type="text" id="search-input" placeholder="Search tasks or notes..." aria-label="ค้นหางานหรือบันทึกย่อ">
                 </div>
-                <button type="submit" class="btn-primary">Save Task</button>
-            </form>
-        </div>
-
-        <!-- Controls: Search & Sort -->
-        <div class="controls-row">
-            <div class="search-box">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="search-input" placeholder="Search tasks or notes...">
+                <div class="sort-select-wrapper">
+                    <select id="sort-select" aria-label="เรียงลำดับงานตาม">
+                        <option value="dueDate">⏰ Due Date</option>
+                        <option value="assignedDate">📅 Assigned Date</option>
+                        <option value="newest">🆕 Newest Created</option>
+                    </select>
+                </div>
             </div>
-            <div class="sort-select-wrapper">
-                <select id="sort-select">
-                    <option value="dueDate">⏰ Due Date</option>
-                    <option value="assignedDate">📅 Assigned Date</option>
-                    <option value="newest">🆕 Newest Created</option>
-                </select>
+
+            <!-- Filters -->
+            <div class="filter-tabs" role="tablist" aria-label="กรองรายการงาน">
+                <button class="tab active" data-filter="all" role="tab" aria-selected="true">All</button>
+                <button class="tab" data-filter="pending" role="tab" aria-selected="false">Pending</button>
+                <button class="tab" data-filter="completed" role="tab" aria-selected="false">Completed</button>
+                <button class="tab" data-filter="overdue" role="tab" aria-selected="false">Overdue</button>
+            </div>
+
+            <!-- Task List Area -->
+            <div id="task-list" class="task-list" role="list" aria-label="รายการงาน"></div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state">
+                <div class="empty-icon" aria-hidden="true">⚙️</div>
+                <p>No tasks found. Add a new task above!</p>
             </div>
         </div>
 
-        <!-- Filters -->
-        <div class="filter-tabs">
-            <button class="tab active" data-filter="all">All</button>
-            <button class="tab" data-filter="pending">Pending</button>
-            <button class="tab" data-filter="completed">Completed</button>
-            <button class="tab" data-filter="overdue">Overdue</button>
-        </div>
-
-        <!-- Task List Area -->
-        <div id="task-list" class="task-list"></div>
-
-        <!-- Empty State -->
-        <div id="empty-state" class="empty-state">
-            <div class="empty-icon">⚙️</div>
-            <p>No tasks found. Add a new task above!</p>
+        <!-- ===== 3D HOLOGRAM CALENDAR VIEW ===== -->
+        <div id="view-calendar" class="hidden">
+            <div id="holo-stage" class="hologram-stage" role="img" aria-label="ปฏิทินโฮโลแกรม 3 มิติแสดงกำหนดส่งงาน ลากเพื่อหมุนดูรอบทิศทาง">
+                <div class="hologram-ring-wrapper">
+                    <div id="holo-ring" class="hologram-ring"></div>
+                </div>
+                <div id="holo-empty" class="hologram-empty hidden">
+                    ยังไม่มีงานที่กำหนดวันส่ง<br>เพิ่มงานพร้อมวันครบกำหนดเพื่อดูในปฏิทิน 3 มิติ
+                </div>
+                <div class="hologram-controls">
+                    <button id="holo-rotate-left" class="holo-btn" aria-label="หมุนปฏิทินไปทางซ้าย">◀</button>
+                    <button id="holo-auto-btn" class="holo-btn" aria-pressed="false" aria-label="เปิด/ปิดการหมุนอัตโนมัติ">⟳</button>
+                    <button id="holo-rotate-right" class="holo-btn" aria-label="หมุนปฏิทินไปทางขวา">▶</button>
+                </div>
+            </div>
+            <p class="hologram-hint">ลากด้วยนิ้วหรือเมาส์เพื่อหมุนดูงานทั้งหมดแบบ 360°</p>
         </div>
     </div>
 
-    <script>
-        let tasks = JSON.parse(localStorage.getItem('mcr_tasks')) || [];
-        let currentFilter = 'all';
-        let searchQuery = '';
-        let currentSort = 'dueDate';
+    <!-- ===== EDIT TASK MODAL ===== -->
+    <div id="edit-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="edit-modal-title" class="modal-title">Edit Task</h2>
+                <button id="edit-close-btn" class="modal-close" aria-label="ปิดหน้าต่างแก้ไขงาน">✕</button>
+            </div>
+            <form id="edit-form">
+                <div class="form-group">
+                    <label for="edit-title">Task Title / Subject</label>
+                    <input type="text" id="edit-title" required aria-required="true">
+                </div>
+                <div class="form-group">
+                    <label for="edit-note">Notes / Details (Optional)</label>
+                    <textarea id="edit-note" rows="2"></textarea>
+                </div>
+                <div class="date-row">
+                    <div class="form-group">
+                        <label for="edit-assigned-date">Assigned Date</label>
+                        <input type="date" id="edit-assigned-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-due-date">Due Date & Time</label>
+                        <input type="datetime-local" id="edit-due-date">
+                    </div>
+                </div>
+                <div class="modal-actions-row">
+                    <button type="button" id="edit-cancel-btn" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        const taskForm = document.getElementById('task-form');
-        const taskInput = document.getElementById('task-input');
-        const taskNoteInput = document.getElementById('task-note');
-        const assignedDateInput = document.getElementById('assigned-date');
-        const dueDateInput = document.getElementById('due-date');
-        const searchInput = document.getElementById('search-input');
-        const sortSelect = document.getElementById('sort-select');
-        const filterTabs = document.querySelectorAll('.tab');
-        const taskList = document.getElementById('task-list');
-        const emptyState = document.getElementById('empty-state');
-        const btnNotification = document.getElementById('btn-notification');
+    <!-- ===== AUTH / SYNC MODAL ===== -->
+    <div id="auth-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="auth-title" class="modal-title">Sign in to sync</h2>
+                <button id="auth-close-btn" class="modal-close" aria-label="ปิดหน้าต่างเข้าสู่ระบบ">✕</button>
+            </div>
 
-        function saveAndRender() {
-            localStorage.setItem('mcr_tasks', JSON.stringify(tasks));
-            renderTasks();
-            checkAndTriggerNotifications();
-        }
+            <div id="auth-form-box">
+                <p id="auth-error" style="color:#ef4444; font-size:12px; margin-bottom:10px;" role="alert"></p>
+                <form id="auth-form">
+                    <div class="form-group">
+                        <label for="auth-email">Email</label>
+                        <input type="email" id="auth-email" required aria-required="true">
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-password">Password</label>
+                        <input type="password" id="auth-password" required minlength="6" aria-required="true">
+                    </div>
+                    <button type="submit" id="auth-submit-btn" class="btn-primary">Sign In</button>
+                </form>
+                <p class="auth-toggle-text">
+                    <button type="button" id="auth-toggle-btn">Need an account? Register</button>
+                </p>
+                <p class="sync-status-text">☁️ ต้องตั้งค่า Firebase ก่อนใช้งาน — ดูวิธีทำใน js/sync.js</p>
+            </div>
 
-        function formatDateTimeDisplay(dtStr) {
-            if (!dtStr) return '';
-            if (dtStr.includes('T')) {
-                const [d, t] = dtStr.split('T');
-                return `${d} ${t}`;
-            }
-            return dtStr;
-        }
+            <div id="auth-logged-in-box" class="hidden">
+                <p style="font-size:13px; color:#94a3b8; margin-bottom:16px;">
+                    เข้าสู่ระบบด้วย <strong id="auth-user-email" style="color:#f3f4f6;"></strong>
+                </p>
+                <button id="auth-logout-btn" class="btn-secondary">Sign Out</button>
+            </div>
+        </div>
+    </div>
 
-        function renderTasks() {
-            const total = tasks.length;
-            const completedCount = tasks.filter(t => t.completed).length;
-            const pendingCount = total - completedCount;
-
-            document.getElementById('total-count').textContent = total;
-            document.getElementById('pending-count').textContent = pendingCount;
-            document.getElementById('completed-count').textContent = completedCount;
-
-            const nowIso = new Date().toISOString().slice(0, 16);
-
-            // 1. Filter Tasks
-            let filteredTasks = tasks.filter(task => {
-                if (currentFilter === 'pending') return !task.completed;
-                if (currentFilter === 'completed') return task.completed;
-                if (currentFilter === 'overdue') {
-                    return !task.completed && task.dueDate && task.dueDate < nowIso;
-                }
-                return true;
-            });
-
-            // 2. Search
-            if (searchQuery.trim() !== '') {
-                const q = searchQuery.toLowerCase().trim();
-                filteredTasks = filteredTasks.filter(task => 
-                    task.title.toLowerCase().includes(q) || 
-                    (task.note && task.note.toLowerCase().includes(q))
-                );
-            }
-
-            // 3. Sort Tasks
-            filteredTasks.sort((a, b) => {
-                if (currentSort === 'dueDate') {
-                    if (!a.dueDate) return 1;
-                    if (!b.dueDate) return -1;
-                    return a.dueDate.localeCompare(b.dueDate);
-                } else if (currentSort === 'assignedDate') {
-                    if (!a.assignedDate) return 1;
-                    if (!b.assignedDate) return -1;
-                    return b.assignedDate.localeCompare(a.assignedDate);
-                } else {
-                    return b.id - a.id;
-                }
-            });
-
-            // 4. Render
-            taskList.innerHTML = '';
-
-            if (filteredTasks.length === 0) {
-                emptyState.style.display = 'block';
-            } else {
-                emptyState.style.display = 'none';
-
-                filteredTasks.forEach((task) => {
-                    const isOverdue = !task.completed && task.dueDate && task.dueDate < nowIso;
-                    
-                    const taskCard = document.createElement('div');
-                    taskCard.className = `task-item ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
-
-                    const assignedText = task.assignedDate ? `Assigned: ${task.assignedDate}` : '';
-                    const dueText = task.dueDate ? `Due: ${formatDateTimeDisplay(task.dueDate)}` : '';
-                    const noteHTML = task.note ? `<div class="task-note">📝 ${escapeHtml(task.note)}</div>` : '';
-
-                    taskCard.innerHTML = `
-                        <div class="task-info">
-                            <div class="task-title-row">
-                                <div class="task-title">${escapeHtml(task.title)}</div>
-                                <span class="status-badge ${task.completed ? 'badge-completed' : 'badge-pending'}">
-                                    ${task.completed ? '✅ Completed' : '⏳ Pending'}
-                                </span>
-                            </div>
-                            ${noteHTML}
-                            <div class="task-dates">
-                                ${assignedText ? `<span>📅 ${assignedText}</span>` : ''}
-                                ${dueText ? `<span style="color: ${isOverdue ? '#ef4444' : '#38bdf8'}; font-weight: ${isOverdue ? 'bold' : 'normal'};">⏰ ${dueText} ${isOverdue ? '(Overdue)' : ''}</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="task-actions">
-                            <button class="btn-action btn-check ${task.completed ? 'active-check' : ''}" onclick="toggleTask(${task.id})" title="${task.completed ? 'Mark as Pending' : 'Mark as Completed'}">
-                                ${task.completed ? '↩️' : '✓'}
-                            </button>
-                            <button class="btn-action btn-delete" onclick="deleteTask(${task.id})" title="Delete Task">
-                                🗑️
-                            </button>
-                        </div>
-                    `;
-
-                    taskList.appendChild(taskCard);
-                });
-            }
-        }
-
-        // Form Submit
-        taskForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const newTask = {
-                id: Date.now(),
-                title: taskInput.value.trim(),
-                note: taskNoteInput.value.trim(),
-                assignedDate: assignedDateInput.value,
-                dueDate: dueDateInput.value,
-                completed: false,
-                notified: false
-            };
-
-            tasks.unshift(newTask);
-            saveAndRender();
-
-            taskInput.value = '';
-            taskNoteInput.value = '';
-            assignedDateInput.value = '';
-            dueDateInput.value = '';
-        });
-
-        // Search Input
-        searchInput.addEventListener('input', (e) => {
-            searchQuery = e.target.value;
-            renderTasks();
-        });
-
-        // Sort Select
-        sortSelect.addEventListener('change', (e) => {
-            currentSort = e.target.value;
-            renderTasks();
-        });
-
-        // Filter Tabs
-        filterTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                filterTabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                currentFilter = tab.getAttribute('data-filter');
-                renderTasks();
-            });
-        });
-
-        // Toggle Task Complete
-        window.toggleTask = function(id) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                task.completed = !task.completed;
-                saveAndRender();
-            }
-        };
-
-        // Delete Task
-        window.deleteTask = function(id) {
-            if (confirm('Are you sure you want to delete this task?')) {
-                tasks = tasks.filter(t => t.id !== id);
-                saveAndRender();
-            }
-        };
-
-        // Notification Handler
-        function updateNotificationBtnState() {
-            if (!("Notification" in window)) {
-                btnNotification.style.display = "none";
-                return;
-            }
-            if (Notification.permission === "granted") {
-                btnNotification.classList.add("active");
-                btnNotification.innerHTML = "🔔 Notifications On";
-            } else {
-                btnNotification.classList.remove("active");
-                btnNotification.innerHTML = "🔔 Notifications";
-            }
-        }
-
-        window.toggleNotificationPermission = function() {
-            if (!("Notification" in window)) {
-                alert("Your browser does not support notifications.");
-                return;
-            }
-
-            if (Notification.permission === "granted") {
-                alert("Notifications are already enabled!");
-            } else if (Notification.permission !== "denied") {
-                Notification.requestPermission().then(permission => {
-                    updateNotificationBtnState();
-                    if (permission === "granted") {
-                        new Notification("Homework Tracker", {
-                            body: "Notifications enabled successfully!",
-                            icon: "icon-192.png"
-                        });
-                    }
-                });
-            } else {
-                alert("Please enable notification permissions in your browser settings.");
-            }
-        };
-
-        // ฟังก์ชันส่ง Notification Centralized
-        function sendNotification(title, task) {
-            const options = {
-                body: `กำหนดส่ง: ${formatDateTimeDisplay(task.dueDate)}\n${task.note ? '📝 ' + task.note : ''}`,
-                icon: "icon-192.png",
-                vibrate: [200, 100, 200],
-                tag: `task-${task.id}`
-            };
-
-            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.ready.then(registration => {
-                    registration.showNotification(title, options);
-                });
-            } else {
-                new Notification(title, options);
-            }
-        }
-
-        // ฟังก์ชันเช็กเวลาและสั่งแจ้งเตือนล่วงหน้า
-        function checkAndTriggerNotifications() {
-            if (!("Notification" in window) || Notification.permission !== "granted") return;
-
-            const now = new Date().getTime();
-            const ONE_HOUR = 60 * 60 * 1000;
-            const ONE_DAY = 24 * ONE_HOUR;
-
-            let hasChanges = false;
-
-            tasks.forEach(task => {
-                if (task.completed || !task.dueDate) return;
-
-                const taskDueDate = new Date(task.dueDate).getTime();
-                if (isNaN(taskDueDate)) return;
-
-                const timeDiff = taskDueDate - now;
-
-                // 1. แจ้งเตือนล่วงหน้า 1 วัน
-                if (timeDiff <= ONE_DAY && timeDiff > ONE_HOUR && !task.notified1Day) {
-                    sendNotification(`⚠️ อีก 1 วันครบกำหนดส่ง: ${task.title}`, task);
-                    task.notified1Day = true;
-                    hasChanges = true;
-                }
-
-                // 2. แจ้งเตือนล่วงหน้า 1 ชั่วโมง
-                if (timeDiff <= ONE_HOUR && timeDiff > 0 && !task.notified1Hour) {
-                    sendNotification(`🚨 รีบทำด่วน! เหลืออีก 1 ชม.: ${task.title}`, task);
-                    task.notified1Hour = true;
-                    hasChanges = true;
-                }
-
-                // 3. แจ้งเตือนเมื่อถึงกำหนดส่ง
-                if (timeDiff <= 0 && !task.notified) {
-                    sendNotification(`⏰ ถึงกำหนดส่งแล้ว!: ${task.title}`, task);
-                    task.notified = true;
-                    hasChanges = true;
-                }
-            });
-
-            if (hasChanges) {
-                localStorage.setItem('mcr_tasks', JSON.stringify(tasks));
-            }
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Init
-        updateNotificationBtnState();
-        renderTasks();
-
-        // Check notifications every minute
-        setInterval(checkAndTriggerNotifications, 60000);
-
-        // Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .catch(err => console.log('SW registration failed: ', err));
-            });
-        }
-    </script>
+    <script src="js/db.js"></script>
+    <script src="js/sync.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
