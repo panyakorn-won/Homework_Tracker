@@ -16,11 +16,22 @@
   let holoLastX = 0;
   let holoLastY = 0;
 
+  // 💡 Billboard Function: คำนวณให้การ์ดหันหน้าตรงหาผู้ใช้เสมอ ไม่เอนไปข้างหลัง
   function applyHoloRotation() {
     const holoRing = document.getElementById('holo-ring');
     if (holoRing) {
       holoRing.style.transform = `rotateX(${holoAngleX}deg) rotateY(${holoAngleY}deg)`;
     }
+
+    // หักลบมุมหมุนเพื่อให้การ์ดตั้งตรง คมชัด อ่านง่าย
+    const nodes = document.querySelectorAll('.holo-card-node');
+    nodes.forEach((node) => {
+      const nodeAngle = parseFloat(node.getAttribute('data-angle') || 0);
+      const card = node.querySelector('.holo-card');
+      if (card) {
+        card.style.transform = `rotateY(${-holoAngleY - nodeAngle}deg) rotateX(${-holoAngleX}deg)`;
+      }
+    });
   }
 
   // ---------- DOM References ----------
@@ -179,7 +190,7 @@
         const safeTitle = escapeHtml(task.title);
 
         taskCard.innerHTML = `
-          <div class="task-info" role="button" tabindex="0" aria-label="แก้ไขงาน ${safeTitle}" data-edit-id="${task.id}">
+          <div class="task-info" role="button" tabindex="0" aria-label="Edit task ${safeTitle}" data-edit-id="${task.id}">
             <div class="task-title-row">
               <div class="task-title">${safeTitle}</div>
               <span class="status-badge ${task.completed ? 'badge-completed' : 'badge-pending'}">
@@ -378,7 +389,7 @@
 
   function sendNotification(title, task) {
     const options = {
-      body: `กำหนดส่ง: ${formatDateTimeDisplay(task.dueDate)}\n${task.note ? '📝 ' + task.note : ''}`,
+      body: `Due: ${formatDateTimeDisplay(task.dueDate)}\n${task.note ? '📝 ' + task.note : ''}`,
       icon: 'icon-192.png',
       vibrate: [200, 100, 200],
       tag: `task-${task.id}`,
@@ -406,17 +417,17 @@
       const timeDiff = taskDueDate - now;
 
       if (timeDiff <= ONE_DAY && timeDiff > ONE_HOUR && !task.notified1Day) {
-        sendNotification(`⚠️ อีก 1 วันครบกำหนดส่ง: ${task.title}`, task);
+        sendNotification(`⚠️ 1 day left: ${task.title}`, task);
         task.notified1Day = true;
         hasChanges = true;
       }
       if (timeDiff <= ONE_HOUR && timeDiff > 0 && !task.notified1Hour) {
-        sendNotification(`🚨 รีบทำด่วน! เหลืออีก 1 ชม.: ${task.title}`, task);
+        sendNotification(`🚨 Urgent! Less than 1 hr left: ${task.title}`, task);
         task.notified1Hour = true;
         hasChanges = true;
       }
       if (timeDiff <= 0 && !task.notified) {
-        sendNotification(`⏰ ถึงกำหนดส่งแล้ว!: ${task.title}`, task);
+        sendNotification(`⏰ Task is due now!: ${task.title}`, task);
         task.notified = true;
         hasChanges = true;
       }
@@ -424,7 +435,7 @@
     });
   }
 
-  // ---------- Original 3D Calendar Renderer ----------
+  // ---------- 3D Hologram Renderer with Billboard Support ----------
   function renderHologram() {
     if (!holoRing) return;
     const upcoming = tasks.filter((t) => t.dueDate).slice();
@@ -443,37 +454,29 @@
     holoRing.appendChild(core);
 
     const count = upcoming.length;
-    const radius = Math.max(150, Math.min(240, count * 30));
+    const radius = Math.max(140, Math.min(220, count * 35));
     const nowIso = new Date().toISOString().slice(0, 16);
 
     upcoming.forEach((task, i) => {
       const angle = (360 / count) * i;
       const isOverdue = !task.completed && task.dueDate < nowIso;
 
-      // Pin Color: Green = Completed / Red = Overdue / Orange = Pending
-      let pinClass = 'pin-orange';
-      if (task.completed) {
-        pinClass = 'pin-green';
-      } else if (isOverdue) {
-        pinClass = 'pin-red';
-      }
-
       const node = document.createElement('div');
       node.className = 'holo-card-node';
+      node.setAttribute('data-angle', angle);
       node.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
 
-      // สายเนออนสีแดงเชื่อมเข้าแกนกลาง
       const line = document.createElement('div');
       line.className = 'holo-line';
       line.style.height = `${radius}px`;
 
-      // การ์ด 3D
       const card = document.createElement('div');
       card.className = `holo-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
       card.innerHTML = `
-        <div class="board-pin ${pinClass}"></div>
-        <div class="holo-title" style="font-weight: bold; margin-bottom: 4px;">${escapeHtml(task.title)}</div>
-        <div class="holo-date" style="font-size: 0.75rem; opacity: 0.8;">⏰ ${formatDateTimeDisplay(task.dueDate)}</div>
+        <div class="holo-title" style="font-weight: bold; margin-bottom: 4px; word-break: break-word;">${escapeHtml(task.title)}</div>
+        <div class="holo-date" style="font-size: 0.75rem; opacity: 0.85; display: flex; align-items: center; gap: 4px;">
+          <span>⏰</span> <span>${formatDateTimeDisplay(task.dueDate)}</span>
+        </div>
       `;
 
       node.appendChild(line);
@@ -484,9 +487,10 @@
     applyHoloRotation();
   }
 
-  // ---------- 3D Drag Control Events ----------
+  // ---------- Drag Control ----------
   if (holoStage) {
     holoStage.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.holo-controls')) return;
       isHoloDragging = true;
       holoLastX = e.clientX;
       holoLastY = e.clientY;
@@ -498,7 +502,7 @@
       const deltaY = e.clientY - holoLastY;
 
       holoAngleY += deltaX * 0.4;
-      holoAngleX = Math.max(-45, Math.min(45, holoAngleX - deltaY * 0.3));
+      holoAngleX = Math.max(-30, Math.min(30, holoAngleX - deltaY * 0.3));
 
       holoLastX = e.clientX;
       holoLastY = e.clientY;
