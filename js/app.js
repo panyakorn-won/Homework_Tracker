@@ -444,7 +444,10 @@
   // ---------- 3D Holographic Calendar ----------
   let holoAngleX = -10; // มุมเอียงแนวตั้ง (Pitch)
   let holoAngleY = 0;   // มุมหมุนแนวนอน (Yaw)
+  let holoScale = 1.0;  // อัตราการซูม (Zoom Scale)
+  let holoLastX = 0;
   let holoLastY = 0;
+  let initialPinchDist = null;
 
   function renderHologram() {
     if (!holoRing) return;
@@ -501,10 +504,10 @@
 
   function applyHoloRotation() {
     if (!holoRing) return;
-    // หมุนเวที 3D ตามมุม X และ Y
-    holoRing.style.transform = `rotateX(${holoAngleX}deg) rotateY(${holoAngleY}deg)`;
+    // หมุนเวที 3D พร้อมปรับ Scale ตามระดับการซูม
+    holoRing.style.transform = `rotateX(${holoAngleX}deg) rotateY(${holoAngleY}deg) scale(${holoScale})`;
 
-    // เทคนิค Billboard: หันการ์ดกลับมาหาผู้ใช้เสมอ ทำให้ตัวอักษรไม่กลับหัว/ไม่อ่านถอยหลัง
+    // เทคนิค Billboard: หันการ์ดกลับมาหาผู้ใช้เสมอ ทำให้ตัวอักษรไม่กลับหัว
     const nodes = holoRing.querySelectorAll('.holo-card-node');
     nodes.forEach((node) => {
       const angle = parseFloat(node.getAttribute('data-angle') || 0);
@@ -537,6 +540,13 @@
   }
 
   if (holoStage) {
+    // ฟังก์ชันคำนวณระยะห่างระหว่างจุดสัมผัส 2 นิ้ว
+    const getPinchDistance = (touches) => {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.hypot(dx, dy);
+    };
+
     const onPointerDown = (clientX, clientY) => {
       stopAutoRotate();
       holoDragging = true;
@@ -552,7 +562,7 @@
 
       // หมุนแนวนอน
       holoAngleY += deltaX * 0.4;
-      // หมุนแนวตั้ง (จำกัดมุมระหว่าง -75 ถึง 75 องศาเพื่อ UX ที่ดี)
+      // หมุนแนวตั้ง (จำกัดมุมระหว่าง -75 ถึง 75 องศา)
       holoAngleX = Math.max(-75, Math.min(75, holoAngleX - deltaY * 0.4));
 
       holoLastX = clientX;
@@ -565,9 +575,60 @@
       holoStage.style.cursor = 'grab';
     };
 
-    holoStage.addEventListener('pointerdown', (e) => onPointerDown(e.clientX, e.clientY));
-    window.addEventListener('pointermove', (e) => onPointerMove(e.clientX, e.clientY));
+    holoStage.addEventListener('pointerdown', (e) => {
+      if (e.isPrimary) {
+        onPointerDown(e.clientX, e.clientY);
+      }
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (e.isPrimary) {
+        onPointerMove(e.clientX, e.clientY);
+      }
+    });
+
     window.addEventListener('pointerup', onPointerUp);
+
+    // --- 1. ระบบ Zoom ด้วย Mouse Wheel (ลูกกลิ้งเมาส์) ---
+    holoStage.addEventListener('wheel', (e) => {
+      e.preventDefault(); // ป้องกันหน้าจอหลักเลื่อน
+      stopAutoRotate();
+      const zoomSpeed = 0.08;
+      if (e.deltaY < 0) {
+        // Scroll Up = ซูมเข้า
+        holoScale = Math.min(2.2, holoScale + zoomSpeed);
+      } else {
+        // Scroll Down = ซูมออก
+        holoScale = Math.max(0.4, holoScale - zoomSpeed);
+      }
+      applyHoloRotation();
+    }, { passive: false });
+
+    // --- 2. ระบบ Pinch to Zoom (กาง/หนีบนิ้วบนหน้าจอสัมผัส) ---
+    holoStage.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        holoDragging = false; // หยุดการหมุนชั่วคราวขณะซูม
+        initialPinchDist = getPinchDistance(e.touches);
+      }
+    }, { passive: true });
+
+    holoStage.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && initialPinchDist) {
+        e.preventDefault(); // ป้องกันเบราว์เซอร์ซูมเว็บทั้งหน้า
+        stopAutoRotate();
+        const currentDist = getPinchDistance(e.touches);
+        const diff = (currentDist - initialPinchDist) * 0.006;
+        holoScale = Math.max(0.4, Math.min(2.2, holoScale + diff));
+        initialPinchDist = currentDist;
+        applyHoloRotation();
+      }
+    }, { passive: false });
+
+    holoStage.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        initialPinchDist = null;
+      }
+    });
 
     holoRotateLeft.addEventListener('click', () => {
       stopAutoRotate();
