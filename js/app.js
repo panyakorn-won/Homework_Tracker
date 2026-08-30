@@ -490,30 +490,32 @@
     applyHoloRotation();
   }
 
-  // ---------- Drag & Wheel Zoom Control ----------
+  // ---------- Drag & Pinch-to-Zoom Control ----------
+  let touchStartDist = 0;
+  let touchStartScale = 1;
+
   if (holoStage) {
-    // 1. ระบบซูมด้วยลูกกลิ้งเมาส์ (Mouse Wheel Zoom)
+    // 1. ระบบซูมด้วยลูกกลิ้งเมาส์สำหรับ Desktop (Mouse Wheel)
     holoStage.addEventListener('wheel', (e) => {
       e.preventDefault();
       const zoomSpeed = 0.08;
       if (e.deltaY > 0) {
-        holoScale = Math.max(0.4, holoScale - zoomSpeed); // ซูมออก
+        holoScale = Math.max(0.4, holoScale - zoomSpeed);
       } else {
-        holoScale = Math.min(2.5, holoScale + zoomSpeed); // ซูมเข้า
+        holoScale = Math.min(2.5, holoScale + zoomSpeed);
       }
       applyHoloRotation();
     }, { passive: false });
 
-    // 2. ระบบคลิกลากหมุน (Pointer/Touch Drag)
-    holoStage.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('.holo-controls')) return;
+    // 2. ระบบเมาส์สำหรับ Desktop (Mouse Drag Rotation)
+    holoStage.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.hologram-controls')) return;
       isHoloDragging = true;
       holoLastX = e.clientX;
       holoLastY = e.clientY;
-      try { holoStage.setPointerCapture(e.pointerId); } catch (err) {}
     });
 
-    window.addEventListener('pointermove', (e) => {
+    window.addEventListener('mousemove', (e) => {
       if (!isHoloDragging) return;
       const deltaX = e.clientX - holoLastX;
       const deltaY = e.clientY - holoLastY;
@@ -527,10 +529,63 @@
       applyHoloRotation();
     });
 
-    window.addEventListener('pointerup', (e) => {
-      if (isHoloDragging) {
+    window.addEventListener('mouseup', () => {
+      isHoloDragging = false;
+    });
+
+    // 3. ระบบสัมผัสบนมือถือ/แท็บเล็ต (Touch: 1 นิ้วหมุน / 2 นิ้วซูม)
+    holoStage.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        // 1 นิ้ว: เริ่มหมุน 3D Stage
+        isHoloDragging = true;
+        holoLastX = e.touches[0].clientX;
+        holoLastY = e.touches[0].clientY;
+      } else if (e.touches.length === 2) {
+        // 2 นิ้ว: เริ่มวัดระยะห่างระหว่าง 2 นิ้วเพื่อทำ Pinch-to-Zoom
+        isHoloDragging = false; // ปิดการหมุนขณะกำลังซูม
+        touchStartDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        touchStartScale = holoScale;
+      }
+    }, { passive: true });
+
+    holoStage.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1 && isHoloDragging) {
+        // คำนวณการหมุนตามนิ้วเดียว
+        const deltaX = e.touches[0].clientX - holoLastX;
+        const deltaY = e.touches[0].clientY - holoLastY;
+
+        holoAngleY += deltaX * 0.4;
+        holoAngleX = Math.max(-60, Math.min(60, holoAngleX - deltaY * 0.3));
+
+        holoLastX = e.touches[0].clientX;
+        holoLastY = e.touches[0].clientY;
+
+        applyHoloRotation();
+      } else if (e.touches.length === 2 && touchStartDist > 0) {
+        // คำนวณระยะกาง/หนีบของ 2 นิ้ว
+        e.preventDefault(); // ป้องกันหน้าเว็บซูมหลุดขอบ
+        const currentDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const factor = currentDist / touchStartDist;
+        const newScale = touchStartScale * factor;
+
+        // จำกัดระยะซูมระหว่าง 0.4x ถึง 2.5x
+        holoScale = Math.max(0.4, Math.min(2.5, newScale));
+        applyHoloRotation();
+      }
+    }, { passive: false });
+
+    holoStage.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        touchStartDist = 0;
+      }
+      if (e.touches.length === 0) {
         isHoloDragging = false;
-        try { holoStage.releasePointerCapture(e.pointerId); } catch (err) {}
       }
     });
   }
