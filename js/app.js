@@ -8,12 +8,17 @@
   let currentSort = 'dueDate';
   let editingTaskId = null;
   let authMode = 'login'; // 'login' | 'register'
-  let holoAngle = 0;
-  let holoDragging = false;
-  let holoLastX = 0;
-  let holoAutoRotate = null;
 
-  // ---------- DOM refs ----------
+  // ---------- Corkboard (Detective Board) State ----------
+  let boardX = 0;
+  let boardY = 0;
+  let boardScale = 1.0;
+  let isBoardDragging = false;
+  let boardLastX = 0;
+  let boardLastY = 0;
+  let initialPinchDistBoard = null;
+
+  // ---------- DOM References ----------
   const $ = (id) => document.getElementById(id);
 
   const taskForm = $('task-form');
@@ -57,14 +62,10 @@
   const authFormBox = $('auth-form-box');
   const authUserEmail = $('auth-user-email');
 
-  const holoRing = $('holo-ring');
   const holoStage = $('holo-stage');
   const holoEmpty = $('holo-empty');
-  const holoRotateLeft = $('holo-rotate-left');
-  const holoRotateRight = $('holo-rotate-right');
-  const holoAutoBtn = $('holo-auto-btn');
 
-  // ---------- Persistence + Sync bridge ----------
+  // ---------- Persistence + Sync ----------
   async function loadTasks() {
     await window.TaskDB.migrateFromLocalStorage();
     tasks = await window.TaskDB.getAllTasks();
@@ -140,7 +141,7 @@
     return filtered;
   }
 
-  // ---------- Render: List view ----------
+  // ---------- Render List View ----------
   function render() {
     const total = tasks.length;
     const completedCount = tasks.filter((t) => t.completed).length;
@@ -186,11 +187,11 @@
             </div>
           </div>
           <div class="task-actions">
-            <button class="btn-action btn-edit" data-edit-id="${task.id}" aria-label="แก้ไขรายละเอียดงาน ${safeTitle}" title="Edit Task">✏️</button>
-            <button class="btn-action btn-check ${task.completed ? 'active-check' : ''}" data-toggle-id="${task.id}" aria-label="${task.completed ? `ทำเครื่องหมายว่ายังไม่เสร็จ: ${safeTitle}` : `ทำเครื่องหมายว่าเสร็จแล้ว: ${safeTitle}`}" title="${task.completed ? 'Mark as Pending' : 'Mark as Completed'}">
+            <button class="btn-action btn-edit" data-edit-id="${task.id}" title="Edit Task">✏️</button>
+            <button class="btn-action btn-check ${task.completed ? 'active-check' : ''}" data-toggle-id="${task.id}" title="${task.completed ? 'Mark as Pending' : 'Mark as Completed'}">
               ${task.completed ? '↩️' : '✓'}
             </button>
-            <button class="btn-action btn-delete" data-delete-id="${task.id}" aria-label="ลบงาน ${safeTitle}" title="Delete Task">🗑️</button>
+            <button class="btn-action btn-delete" data-delete-id="${task.id}" title="Delete Task">🗑️</button>
           </div>
         `;
 
@@ -212,15 +213,6 @@
       toggleTask(Number(toggleBtn.getAttribute('data-toggle-id')));
     } else if (deleteBtn) {
       handleDeleteTask(Number(deleteBtn.getAttribute('data-delete-id')));
-    }
-  });
-
-  taskList.addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    const target = e.target.closest('.task-info[data-edit-id]');
-    if (target) {
-      e.preventDefault();
-      openEditModal(Number(target.getAttribute('data-edit-id')));
     }
   });
 
@@ -293,7 +285,7 @@
     if (e.target === editModal) closeEditModal();
   });
 
-  // ---------- Toggle / Delete ----------
+  // ---------- Toggle & Delete ----------
   async function toggleTask(id) {
     const task = tasks.find((t) => t.id === id);
     if (!task) return;
@@ -309,7 +301,7 @@
     await saveAndRender();
   }
 
-  // ---------- Search / Sort / Filter ----------
+  // ---------- Search, Sort & Filter ----------
   searchInput.addEventListener('input', (e) => {
     searchQuery = e.target.value;
     render();
@@ -322,12 +314,8 @@
 
   filterTabs.forEach((tab) => {
     tab.addEventListener('click', () => {
-      filterTabs.forEach((t) => {
-        t.classList.remove('active');
-        t.setAttribute('aria-selected', 'false');
-      });
+      filterTabs.forEach((t) => t.classList.remove('active'));
       tab.classList.add('active');
-      tab.setAttribute('aria-selected', 'true');
       currentFilter = tab.getAttribute('data-filter');
       render();
     });
@@ -340,8 +328,6 @@
     viewCalendar.classList.toggle('hidden', isList);
     viewListBtn.classList.toggle('active', isList);
     viewCalendarBtn.classList.toggle('active', !isList);
-    viewListBtn.setAttribute('aria-selected', String(isList));
-    viewCalendarBtn.setAttribute('aria-selected', String(!isList));
     if (!isList) renderHologram();
   }
   viewListBtn.addEventListener('click', () => setView('list'));
@@ -356,11 +342,9 @@
     if (Notification.permission === 'granted') {
       btnNotification.classList.add('active');
       btnNotification.innerHTML = '🔔 Notifications On';
-      btnNotification.setAttribute('aria-pressed', 'true');
     } else {
       btnNotification.classList.remove('active');
       btnNotification.innerHTML = '🔔 Notifications';
-      btnNotification.setAttribute('aria-pressed', 'false');
     }
   }
 
@@ -382,7 +366,7 @@
         }
       });
     } else {
-      alert('Please enable notification permissions in your browser settings.');
+      alert('Please enable notification permissions in browser settings.');
     }
   };
 
@@ -395,7 +379,7 @@
     };
 
     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.ready.then((registration) => registration.showNotification(title, options));
+      navigator.serviceWorker.ready.then((reg) => reg.showNotification(title, options));
     } else {
       new Notification(title, options);
     }
@@ -434,193 +418,191 @@
     });
   }
 
-  // ---------- 3D Holographic Calendar ----------
-  let holoAngleX = -10;
-  let holoAngleY = 0;
-  let holoScale = 1.0;
-  let holoLastY = 0;
-  let initialPinchDist = null;
+  // ---------- Detective Corkboard (Interactive Pan/Zoom & Pin Board) ----------
+  function applyBoardTransform() {
+    const contentWrapper = document.getElementById('corkboard-content');
+    if (contentWrapper) {
+      contentWrapper.style.transform = `translate(${boardX}px, ${boardY}px) scale(${boardScale})`;
+    }
+  }
+
+  function resetBoardView() {
+    boardX = 20;
+    boardY = 20;
+    boardScale = 1.0;
+    applyBoardTransform();
+  }
 
   function renderHologram() {
-    if (!holoRing) return;
+    if (!holoStage) return;
     const upcoming = tasks.filter((t) => t.dueDate).slice();
     upcoming.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
 
-    holoRing.innerHTML = '';
+    holoStage.innerHTML = '';
 
     if (upcoming.length === 0) {
-      holoEmpty.classList.remove('hidden');
+      if (holoEmpty) holoEmpty.classList.remove('hidden');
       return;
     }
-    holoEmpty.classList.add('hidden');
+    if (holoEmpty) holoEmpty.classList.add('hidden');
 
-    const core = document.createElement('div');
-    core.className = 'holo-core';
-    holoRing.appendChild(core);
+    // Controls (+ / - / Reset)
+    const controls = document.createElement('div');
+    controls.className = 'board-controls';
+    controls.innerHTML = `
+      <button class="board-btn" id="btn-zoom-in" title="Zoom In">➕</button>
+      <button class="board-btn" id="btn-zoom-out" title="Zoom Out">➖</button>
+      <button class="board-btn" id="btn-zoom-reset" title="Reset View">🎯</button>
+    `;
+    holoStage.appendChild(controls);
 
-    const count = upcoming.length;
-    const radius = Math.max(140, Math.min(230, count * 28));
+    // Main Content Wrapper for Pan/Zoom
+    const contentWrapper = document.createElement('div');
+    contentWrapper.id = 'corkboard-content';
+    contentWrapper.className = 'corkboard-content';
+    holoStage.appendChild(contentWrapper);
+
+    // SVG Canvas for Red Yarn
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'string-canvas');
+    contentWrapper.appendChild(svg);
+
+    const pins = [];
     const nowIso = new Date().toISOString().slice(0, 16);
+    const stageWidth = holoStage.clientWidth || 360;
 
     upcoming.forEach((task, i) => {
-      const angle = (360 / count) * i;
       const isOverdue = !task.completed && task.dueDate < nowIso;
 
-      const node = document.createElement('div');
-      node.className = 'holo-card-node';
-      node.setAttribute('data-angle', angle);
-      node.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+      // Pin Color: Green = Completed / Red = Overdue / Orange = Pending
+      let pinClass = 'pin-orange';
+      if (task.completed) {
+        pinClass = 'pin-green';
+      } else if (isOverdue) {
+        pinClass = 'pin-red';
+      }
+
+      const col = i % 2;
+      const row = Math.floor(i / 2);
+      const x = col === 0 ? 30 + (i * 20) % 40 : stageWidth - 180 - (i * 15) % 40;
+      const y = 40 + row * 145 + (i % 3) * 15;
+      const rotate = ((i * 11) % 16 - 8);
 
       const card = document.createElement('div');
-      card.className = `holo-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
+      card.className = `postit-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
+      card.style.left = `${x}px`;
+      card.style.top = `${y}px`;
+      card.style.transform = `rotate(${rotate}deg)`;
+
       card.innerHTML = `
-        <div class="holo-title">${escapeHtml(task.title)}</div>
-        <div class="holo-date">⏰ ${formatDateTimeDisplay(task.dueDate)}</div>
+        <div class="board-pin ${pinClass}"></div>
+        <div style="font-weight: bold; font-size: 0.85rem; margin-bottom: 6px; word-break: break-word;">${escapeHtml(task.title)}</div>
+        <div style="font-size: 0.75rem; color: #475569;">⏰ ${formatDateTimeDisplay(task.dueDate)}</div>
       `;
 
-      node.appendChild(card);
-      holoRing.appendChild(node);
+      contentWrapper.appendChild(card);
+
+      pins.push({
+        x: x + 75,
+        y: y - 1
+      });
     });
 
-    applyHoloRotation();
-  }
-
-  function applyHoloRotation() {
-    if (!holoRing) return;
-    holoRing.style.transform = `rotateX(${holoAngleX}deg) rotateY(${holoAngleY}deg) scale(${holoScale})`;
-
-    const nodes = holoRing.querySelectorAll('.holo-card-node');
-    nodes.forEach((node) => {
-      const angle = parseFloat(node.getAttribute('data-angle') || 0);
-      const innerCard = node.querySelector('.holo-card');
-      if (innerCard) {
-        innerCard.style.transform = `rotateY(${-angle - holoAngleY}deg) rotateX(${-holoAngleX}deg)`;
-      }
-    });
-  }
-
-  function stopAutoRotate() {
-    if (holoAutoRotate) {
-      cancelAnimationFrame(holoAutoRotate);
-      holoAutoRotate = null;
-      holoAutoBtn.setAttribute('aria-pressed', 'false');
-      holoAutoBtn.classList.remove('active');
+    // Draw Red Yarn Connecting Pins
+    for (let i = 0; i < pins.length - 1; i++) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', pins[i].x);
+      line.setAttribute('y1', pins[i].y);
+      line.setAttribute('x2', pins[i + 1].x);
+      line.setAttribute('y2', pins[i + 1].y);
+      line.setAttribute('class', 'string-line');
+      svg.appendChild(line);
     }
+
+    applyBoardTransform();
+
+    document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
+      boardScale = Math.min(2.5, boardScale + 0.25);
+      applyBoardTransform();
+    });
+    document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
+      boardScale = Math.max(0.4, boardScale - 0.25);
+      applyBoardTransform();
+    });
+    document.getElementById('btn-zoom-reset')?.addEventListener('click', resetBoardView);
   }
 
-  function startAutoRotate() {
-    stopAutoRotate();
-    holoAutoBtn.setAttribute('aria-pressed', 'true');
-    holoAutoBtn.classList.add('active');
-    const step = () => {
-      holoAngleY = (holoAngleY + 0.3) % 360;
-      applyHoloRotation();
-      holoAutoRotate = requestAnimationFrame(step);
-    };
-    holoAutoRotate = requestAnimationFrame(step);
-  }
-
+  // ---------- Pan & Zoom Handlers ----------
   if (holoStage) {
-    const getPinchDistance = (touches) => {
-      const dx = touches[0].clientX - touches[1].clientX;
-      const dy = touches[0].clientY - touches[1].clientY;
-      return Math.hypot(dx, dy);
-    };
-
-    const onPointerDown = (clientX, clientY) => {
-      stopAutoRotate();
-      holoDragging = true;
-      holoLastX = clientX;
-      holoLastY = clientY;
-      holoStage.style.cursor = 'grabbing';
-    };
-
-    const onPointerMove = (clientX, clientY) => {
-      if (!holoDragging) return;
-      const deltaX = clientX - holoLastX;
-      const deltaY = clientY - holoLastY;
-
-      holoAngleY += deltaX * 0.4;
-      holoAngleX = Math.max(-75, Math.min(75, holoAngleX - deltaY * 0.4));
-
-      holoLastX = clientX;
-      holoLastY = clientY;
-      applyHoloRotation();
-    };
-
-    const onPointerUp = () => {
-      holoDragging = false;
-      holoStage.style.cursor = 'grab';
-    };
-
     holoStage.addEventListener('pointerdown', (e) => {
-      if (e.isPrimary) {
-        onPointerDown(e.clientX, e.clientY);
-      }
+      if (e.target.closest('.board-controls')) return;
+      isBoardDragging = true;
+      boardLastX = e.clientX;
+      boardLastY = e.clientY;
     });
 
     window.addEventListener('pointermove', (e) => {
-      if (e.isPrimary) {
-        onPointerMove(e.clientX, e.clientY);
-      }
+      if (!isBoardDragging) return;
+      const deltaX = e.clientX - boardLastX;
+      const deltaY = e.clientY - boardLastY;
+
+      boardX += deltaX;
+      boardY += deltaY;
+
+      boardLastX = e.clientX;
+      boardLastY = e.clientY;
+
+      applyBoardTransform();
     });
 
-    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointerup', () => {
+      isBoardDragging = false;
+    });
 
     holoStage.addEventListener('wheel', (e) => {
       e.preventDefault();
-      stopAutoRotate();
       const zoomSpeed = 0.08;
       if (e.deltaY < 0) {
-        holoScale = Math.min(2.2, holoScale + zoomSpeed);
+        boardScale = Math.min(2.5, boardScale + zoomSpeed);
       } else {
-        holoScale = Math.max(0.4, holoScale - zoomSpeed);
+        boardScale = Math.max(0.4, boardScale - zoomSpeed);
       }
-      applyHoloRotation();
+      applyBoardTransform();
     }, { passive: false });
+
+    const getPinchDist = (touches) => {
+      return Math.hypot(
+        touches[0].clientX - touches[1].clientX,
+        touches[0].clientY - touches[1].clientY
+      );
+    };
 
     holoStage.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
-        holoDragging = false;
-        initialPinchDist = getPinchDistance(e.touches);
+        isBoardDragging = false;
+        initialPinchDistBoard = getPinchDist(e.touches);
       }
     }, { passive: true });
 
     holoStage.addEventListener('touchmove', (e) => {
-      if (e.touches.length === 2 && initialPinchDist) {
+      if (e.touches.length === 2 && initialPinchDistBoard) {
         e.preventDefault();
-        stopAutoRotate();
-        const currentDist = getPinchDistance(e.touches);
-        const diff = (currentDist - initialPinchDist) * 0.006;
-        holoScale = Math.max(0.4, Math.min(2.2, holoScale + diff));
-        initialPinchDist = currentDist;
-        applyHoloRotation();
+        const dist = getPinchDist(e.touches);
+        const diff = (dist - initialPinchDistBoard) * 0.005;
+        boardScale = Math.max(0.4, Math.min(2.5, boardScale + diff));
+        initialPinchDistBoard = dist;
+        applyBoardTransform();
       }
     }, { passive: false });
 
     holoStage.addEventListener('touchend', (e) => {
       if (e.touches.length < 2) {
-        initialPinchDist = null;
+        initialPinchDistBoard = null;
       }
-    });
-
-    holoRotateLeft.addEventListener('click', () => {
-      stopAutoRotate();
-      holoAngleY -= 30;
-      applyHoloRotation();
-    });
-    holoRotateRight.addEventListener('click', () => {
-      stopAutoRotate();
-      holoAngleY += 30;
-      applyHoloRotation();
-    });
-    holoAutoBtn.addEventListener('click', () => {
-      if (holoAutoRotate) stopAutoRotate();
-      else startAutoRotate();
     });
   }
 
-  // ---------- Auth / Cloud Sync UI ----------
+  // ---------- Auth / Sync UI ----------
   function updateSyncBtnState() {
     if (!window.SyncModule.isConfigured()) {
       btnSync.style.display = 'none';
