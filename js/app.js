@@ -86,7 +86,6 @@
     checkAndTriggerNotifications();
   }
 
-  // When cloud sends a fresh task list down (login, or another device changed something)
   async function onRemoteTasksChanged(remoteTasks) {
     tasks = remoteTasks;
     await window.TaskDB.replaceAllTasks(remoteTasks);
@@ -202,7 +201,6 @@
     renderHologram();
   }
 
-  // Event delegation for dynamically created buttons
   taskList.addEventListener('click', (e) => {
     const editBtn = e.target.closest('[data-edit-id]');
     const toggleBtn = e.target.closest('[data-toggle-id]');
@@ -280,7 +278,6 @@
     task.note = editNoteInput.value.trim();
     task.assignedDate = editAssignedInput.value;
     task.dueDate = editDueInput.value;
-    // Editing the due date should let notifications re-fire for the new time
     task.notified = false;
     task.notified1Day = false;
     task.notified1Hour = false;
@@ -404,10 +401,6 @@
     }
   }
 
-  // NOTE ON LIMITATIONS: this checks run only while the tab/app is open
-  // (in foreground or backgrounded but not fully closed). True "notify me even
-  // if the app/browser is completely closed" requires a real push server —
-  // see functions/index.js for an optional Firebase Cloud Function example.
   function checkAndTriggerNotifications() {
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
@@ -442,10 +435,9 @@
   }
 
   // ---------- 3D Holographic Calendar ----------
-  let holoAngleX = -10; // มุมเอียงแนวตั้ง (Pitch)
-  let holoAngleY = 0;   // มุมหมุนแนวนอน (Yaw)
-  let holoScale = 1.0;  // อัตราการซูม (Zoom Scale)
-  let holoLastX = 0;
+  let holoAngleX = -10;
+  let holoAngleY = 0;
+  let holoScale = 1.0;
   let holoLastY = 0;
   let initialPinchDist = null;
 
@@ -462,7 +454,6 @@
     }
     holoEmpty.classList.add('hidden');
 
-    // 1. สร้างแกนกลางโฮโลแกรม (Central Core)
     const core = document.createElement('div');
     core.className = 'holo-core';
     holoRing.appendChild(core);
@@ -475,18 +466,15 @@
       const angle = (360 / count) * i;
       const isOverdue = !task.completed && task.dueDate < nowIso;
 
-      // 2. Node โหนดระบุตำแหน่งในอวกาศ 3 มิติ
       const node = document.createElement('div');
       node.className = 'holo-card-node';
       node.setAttribute('data-angle', angle);
       node.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
 
-      // 3. เส้นลำแสงเชื่อมจากแกนกลางไปยังการ์ด
       const line = document.createElement('div');
       line.className = 'holo-line';
       line.style.height = `${radius}px`;
 
-      // 4. ตัวการ์ดงาน (ที่จะถูกหันหน้าสู้กล้องตลอดเวลา)
       const card = document.createElement('div');
       card.className = `holo-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}`;
       card.innerHTML = `
@@ -504,10 +492,8 @@
 
   function applyHoloRotation() {
     if (!holoRing) return;
-    // หมุนเวที 3D พร้อมปรับ Scale ตามระดับการซูม
     holoRing.style.transform = `rotateX(${holoAngleX}deg) rotateY(${holoAngleY}deg) scale(${holoScale})`;
 
-    // เทคนิค Billboard: หันการ์ดกลับมาหาผู้ใช้เสมอ ทำให้ตัวอักษรไม่กลับหัว
     const nodes = holoRing.querySelectorAll('.holo-card-node');
     nodes.forEach((node) => {
       const angle = parseFloat(node.getAttribute('data-angle') || 0);
@@ -540,7 +526,6 @@
   }
 
   if (holoStage) {
-    // ฟังก์ชันคำนวณระยะห่างระหว่างจุดสัมผัส 2 นิ้ว
     const getPinchDistance = (touches) => {
       const dx = touches[0].clientX - touches[1].clientX;
       const dy = touches[0].clientY - touches[1].clientY;
@@ -560,9 +545,7 @@
       const deltaX = clientX - holoLastX;
       const deltaY = clientY - holoLastY;
 
-      // หมุนแนวนอน
       holoAngleY += deltaX * 0.4;
-      // หมุนแนวตั้ง (จำกัดมุมระหว่าง -75 ถึง 75 องศา)
       holoAngleX = Math.max(-75, Math.min(75, holoAngleX - deltaY * 0.4));
 
       holoLastX = clientX;
@@ -589,32 +572,28 @@
 
     window.addEventListener('pointerup', onPointerUp);
 
-    // --- 1. ระบบ Zoom ด้วย Mouse Wheel (ลูกกลิ้งเมาส์) ---
     holoStage.addEventListener('wheel', (e) => {
-      e.preventDefault(); // ป้องกันหน้าจอหลักเลื่อน
+      e.preventDefault();
       stopAutoRotate();
       const zoomSpeed = 0.08;
       if (e.deltaY < 0) {
-        // Scroll Up = ซูมเข้า
         holoScale = Math.min(2.2, holoScale + zoomSpeed);
       } else {
-        // Scroll Down = ซูมออก
         holoScale = Math.max(0.4, holoScale - zoomSpeed);
       }
       applyHoloRotation();
     }, { passive: false });
 
-    // --- 2. ระบบ Pinch to Zoom (กาง/หนีบนิ้วบนหน้าจอสัมผัส) ---
     holoStage.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
-        holoDragging = false; // หยุดการหมุนชั่วคราวขณะซูม
+        holoDragging = false;
         initialPinchDist = getPinchDistance(e.touches);
       }
     }, { passive: true });
 
     holoStage.addEventListener('touchmove', (e) => {
       if (e.touches.length === 2 && initialPinchDist) {
-        e.preventDefault(); // ป้องกันเบราว์เซอร์ซูมเว็บทั้งหน้า
+        e.preventDefault();
         stopAutoRotate();
         const currentDist = getPinchDistance(e.touches);
         const diff = (currentDist - initialPinchDist) * 0.006;
@@ -645,6 +624,7 @@
       else startAutoRotate();
     });
   }
+
   // ---------- Auth / Cloud Sync UI ----------
   function updateSyncBtnState() {
     if (!window.SyncModule.isConfigured()) {
@@ -673,9 +653,11 @@
     }
     authModal.classList.add('open');
   }
+
   function closeAuthModal() {
     authModal.classList.remove('open');
   }
+
   function setAuthMode(mode) {
     authMode = mode;
     if (mode === 'login') {
@@ -736,133 +718,6 @@
       });
     }
   }
-
-  // ==========================================
-// ระบบเชื่อมต่อ UI และ ปุ่มกดทั้งหมด (Event Wiring)
-// ==========================================
-
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. ดึง Elements หลักจาก HTML
-  const taskForm = document.getElementById('taskForm') || document.querySelector('form');
-  const openModalBtn = document.getElementById('btnAddTask') || document.getElementById('openModalBtn');
-  const closeModalBtn = document.getElementById('closeModalBtn') || document.getElementById('btnCancel');
-  const modal = document.getElementById('taskModal');
-  const navTabs = document.querySelectorAll('.nav-tab, [data-view]');
-
-  // ------------------------------------------
-  // 2. ระบบเปิด-ปิด Modal เพิ่มงาน
-  // ------------------------------------------
-  if (openModalBtn && modal) {
-    openModalBtn.addEventListener('click', () => {
-      modal.classList.remove('hidden');
-      modal.style.display = 'flex'; // ดัน Modal ขึ้นมาแสดง
-    });
-  }
-
-  if (closeModalBtn && modal) {
-    closeModalBtn.addEventListener('click', () => {
-      modal.classList.add('hidden');
-      modal.style.display = 'none';
-    });
-  }
-
-  // ปิด Modal เมื่อแตะพื้นที่ว่างข้างนอก
-  window.addEventListener('click', (e) => {
-    if (modal && e.target === modal) {
-      modal.classList.add('hidden');
-      modal.style.display = 'none';
-    }
-  });
-
-  // ------------------------------------------
-  // 3. ระบบสลับแท็บหน้าจอ (Navigation Views)
-  // ------------------------------------------
-  navTabs.forEach((tab) => {
-    tab.addEventListener('click', (e) => {
-      e.preventDefault();
-      const targetView = tab.getAttribute('data-view');
-      if (!targetView) return;
-
-      // ปิดทุกหน้าจอ
-      document.querySelectorAll('.view-section').forEach((view) => {
-        view.classList.add('hidden');
-        view.style.display = 'none';
-      });
-
-      // เปิดหน้าจอที่เลือก
-      const activeView = document.getElementById(targetView);
-      if (activeView) {
-        activeView.classList.remove('hidden');
-        activeView.style.display = 'block';
-      }
-
-      // เปลี่ยนสถานะ Active ของปุ่มแท็บ
-      navTabs.forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
-
-      // ถ้าสลับมาหน้า 3D Hologram ให้สั่ง Re-render
-      if (targetView === 'hologramView' && typeof renderHologram === 'function') {
-        renderHologram();
-      }
-    });
-  });
-
-  // ------------------------------------------
-  // 4. ระบบกดบันทึกงาน (Form Submit)
-  // ------------------------------------------
-  if (taskForm) {
-    taskForm.addEventListener('submit', async (e) => {
-      e.preventDefault(); // สำคัญมาก: ป้องกันหน้าเว็บ Refresh เอง
-
-      const titleInput = document.getElementById('taskTitle');
-      const dateInput = document.getElementById('taskDueDate');
-      const noteInput = document.getElementById('taskNote');
-
-      if (!titleInput || !titleInput.value.trim()) {
-        alert('กรุณากรอกชื่อหัวข้องานก่อนครับ');
-        return;
-      }
-
-      // สร้างวัตถุงานใหม่
-      const newTask = {
-        id: Date.now().toString(),
-        title: titleInput.value.trim(),
-        dueDate: dateInput ? dateInput.value : '',
-        note: noteInput ? noteInput.value.trim() : '',
-        completed: false,
-        createdAt: new Date().toISOString()
-      };
-
-      try {
-        // เพิ่มงานลง Array หลักของแอป
-        if (Array.isArray(window.tasks)) {
-          window.tasks.push(newTask);
-        } else if (typeof tasks !== 'undefined') {
-          tasks.push(newTask);
-        }
-
-        // บันทึกลง LocalStorage/IndexedDB (ถ้ามี)
-        localStorage.setItem('cognitask_data', JSON.stringify(window.tasks || tasks));
-
-        // อัปเดตหน้าจอ List และ 3D Hologram
-        if (typeof renderTasks === 'function') renderTasks();
-        if (typeof renderHologram === 'function') renderHologram();
-
-        // ล้างข้อมูลในฟอร์มและปิด Modal
-        taskForm.reset();
-        if (modal) {
-          modal.classList.add('hidden');
-          modal.style.display = 'none';
-        }
-
-        alert('บันทึกงานเรียบร้อยแล้ว!');
-      } catch (err) {
-        console.error('Save task error:', err);
-        alert('เกิดข้อผิดพลาดในการบันทึก: ' + err.message);
-      }
-    });
-  }
-});
 
   init();
 })();
