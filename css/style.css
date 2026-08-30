@@ -589,14 +589,35 @@ input:focus, textarea:focus, select:focus {
     pointer-events: none;
 }
 
-.hologram-stage::after {
-    content: "";
-    position: absolute;
-    left: 0; right: 0; top: 0; height: 100%;
-    background: linear-gradient(to bottom, transparent 0%, rgba(56,189,248,0.06) 50%, transparent 100%);
-    background-size: 100% 220%;
-    animation: scan 5s linear infinite;
-    pointer-events: none;
+#holo-stage {
+  perspective: 1000px !important;
+  position: relative;
+  min-height: 480px;
+  height: 520px;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  border-radius: 20px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  /* 1. สีพื้นหลังหลักแบบเข้ม */
+  background-color: #060b17 !important;
+
+  /* 2. สร้างเส้นตารางกะรดาษกราฟ + แสงเรืองตรงกลาง */
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(38, 99, 235, 0.25) 0%, rgba(6, 11, 23, 0.95) 75%),
+    linear-gradient(rgba(56, 189, 248, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.12) 1px, transparent 1px);
+  
+  /* 3. กำหนดขนาดตารางกราฟ (30px x 30px) */
+  background-size: 100% 100%, 30px 30px, 30px 30px;
+  background-position: center center, center center, center center;
+}
+
+#holo-stage:active {
+  cursor: grabbing;
 }
 
 @keyframes scan {
