@@ -900,3 +900,145 @@ input:focus, textarea:focus, select:focus {
 .hidden {
     display: none !important;
 }
+
+
+/* ==========================================
+   Detective Corkboard with Interactive Pan/Zoom
+   ========================================== */
+#holo-stage {
+  background: radial-gradient(circle, #aa6939 0%, #4a2810 100%) !important;
+  border: 5px solid #2b1406;
+  border-radius: 16px;
+  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.8);
+  position: relative;
+  min-height: 520px;
+  height: 550px;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+#holo-stage:active {
+  cursor: grabbing;
+}
+
+/* คอนเทนเนอร์สำหรับขยายและลากกระดาน */
+.corkboard-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* โน้ตกระดาษ Post-it */
+.postit-card {
+  position: absolute;
+  width: 150px;
+  padding: 14px 12px;
+  background: #fef08a;
+  color: #1e293b;
+  box-shadow: 4px 6px 16px rgba(0, 0, 0, 0.45);
+  border-radius: 2px;
+  z-index: 2;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.postit-card:hover {
+  z-index: 10;
+  box-shadow: 8px 14px 24px rgba(0, 0, 0, 0.6);
+}
+
+.postit-card.completed {
+  background: #ecfdf5;
+}
+
+.postit-card.overdue {
+  background: #fff1f2;
+}
+
+/* หมุดปัก (Base Pin) */
+.board-pin {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  z-index: 5;
+}
+
+/* แยกสีหมุดตามสถานะ */
+.pin-green {
+  background: radial-gradient(circle at 35% 35%, #22c55e, #14532d);
+  box-shadow: 0 0 8px #22c55e;
+}
+
+.pin-orange {
+  background: radial-gradient(circle at 35% 35%, #f97316, #7c2d12);
+  box-shadow: 0 0 8px #f97316;
+}
+
+.pin-red {
+  background: radial-gradient(circle at 35% 35%, #ef4444, #7f1d1d);
+  box-shadow: 0 0 10px #ef4444;
+  animation: pulse-red-pin 1.5s infinite alternate;
+}
+
+@keyframes pulse-red-pin {
+  0% { box-shadow: 0 0 6px #ef4444; }
+  100% { box-shadow: 0 0 16px #ef4444, 0 0 22px #f87171; }
+}
+
+/* สายไหมพรมสีแดง */
+.string-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2000px;
+  height: 2000px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.string-line {
+  stroke: #dc2626;
+  stroke-width: 2.5;
+  stroke-dasharray: 0;
+  filter: drop-shadow(2px 3px 3px rgba(0, 0, 0, 0.6));
+}
+
+/* ปุ่มควบคุมการซูมมุมขวาบน */
+.board-controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 20;
+}
+
+.board-btn {
+  background: rgba(15, 23, 42, 0.75);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s;
+}
+
+.board-btn:hover {
+  background: rgba(30, 41, 59, 0.9);
+}
