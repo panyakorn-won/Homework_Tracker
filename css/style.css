@@ -893,6 +893,10 @@ input:focus, textarea:focus, select:focus {
     margin: -8px 0 16px;
 }
 
+.holo-line {
+  display: none !important;
+}
+
 .hidden {
     display: none !important;
 }
